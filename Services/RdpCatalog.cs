@@ -223,13 +223,20 @@ public static class RdpCatalog
              "Plug-and-Play-Geräte außer Laufwerken, \"*\" für alle."),
 
         // ========================================================== Leistung
-        Pick("connection type", 'i', CatPerformance, "Verbindungsart",
-             "Wählt einen Satz Voreinstellungen für die Darstellung. Bei 7 misst mstsc selbst - "
-           + "dann zählen \"networkautodetect\" und \"bandwidthautodetect\".",
-             "1", "Modem (56 kbit/s)", "2", "Niedrig (256 kbit/s - 2 Mbit/s)",
-             "3", "Satellit (2 - 16 Mbit/s, hohe Verzögerung)",
-             "4", "Hoch (2 - 10 Mbit/s)", "5", "WAN (10 Mbit/s und mehr, hohe Verzögerung)",
-             "6", "LAN (10 Mbit/s und mehr)", "7", "Automatisch erkennen"),
+        // Die Beschriftungen sind wörtlich die aus dem Dialog von mstsc -
+        // damit die Auswahl hier und dort dieselbe Liste ist.
+        Pick("connection type", 'i', CatPerformance, "Übertragungsrate",
+             "Die Rate für sich ändert nichts an der Darstellung - sie ist nur eine Zahl in der "
+           + "Datei. Welche Haken dazugehören, setzen die Knöpfe über dieser Gruppe. Bei 7 misst "
+           + "mstsc beim Verbinden selbst; dann zählen \"networkautodetect\" und "
+           + "\"bandwidthautodetect\".",
+             "1", "Modem (56 kBit/s)",
+             "2", "Breitband mit niedriger Übertragungsrate (256 kBit/s - 2 MBit/s)",
+             "3", "Satellit (2 MBit/s - 16 MBit/s mit häufiger Latenz)",
+             "4", "Breitband mit hoher Übertragungsrate (2 MBit/s - 10 MBit/s)",
+             "5", "WAN (10 MBit/s oder höher mit häufiger Latenz)",
+             "6", "LAN (10 MBit/s oder höher)",
+             "7", "Automatisch erkennen"),
         Toggle("networkautodetect", CatPerformance, "Netz automatisch messen",
              "Gehört zur Verbindungsart \"Automatisch erkennen\"."),
         Toggle("bandwidthautodetect", CatPerformance, "Bandbreite automatisch messen",

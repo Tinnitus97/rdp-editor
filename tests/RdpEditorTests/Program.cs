@@ -357,16 +357,86 @@ internal static class Program
         Check("in ein Zahlenfeld schreibt keine Vorgabe Text",
             falscherWert.Count == 0, string.Join(", ", falscherWert));
 
-        // Und die Probe, dass eine Vorgabe wirklich ankommt.
-        var doc = RdpDocument.CreateDefault();
-        var lan = presets.First(p => p.Title.StartsWith("LAN"));
-        foreach (var (key, value) in lan.Values)
-            doc.Set(key, RdpCatalog.Find(key)?.Type ?? 's', value);
+        PruefeUebertragungsraten(presets);
+    }
 
-        Check("die Vorgabe \"LAN\" setzt die Übertragungsrate",
-            doc.GetInt("connection type", -1) == 6);
-        Check("die Vorgabe \"LAN\" lässt das Hintergrundbild an",
-            doc.GetInt("disable wallpaper", -1) == 0);
+    /// <summary>
+    /// Die Übertragungsraten gegen das, was mstsc selbst tut.
+    ///
+    /// Die Tabelle steht hier in der Sicht des Dialogs - ein Haken heißt
+    /// "erlaubt". In der Datei ist derselbe Zustand mal eine 1 und mal eine 0,
+    /// je nachdem, ob der Schlüssel "allow ..." oder "disable ..." heißt.
+    /// Genau diese Umrechnung ist die Stelle, an der man sich vertut, und
+    /// genau deshalb steht die Tabelle hier ein zweites Mal.
+    /// </summary>
+    private static void PruefeUebertragungsraten(IReadOnlyList<RdpPreset> presets)
+    {
+        // Reihenfolge wie im Dialog: Desktophintergrund, Schriftartglättung,
+        // Desktopgestaltung, Fensterinhalt beim Ziehen, Menü- und
+        // Fensteranimation, visuelle Stile.
+        var felder = new (string Key, bool Invertiert)[]
+        {
+            ("disable wallpaper", true),
+            ("allow font smoothing", false),
+            ("allow desktop composition", false),
+            ("disable full window drag", true),
+            ("disable menu anims", true),
+            ("disable themes", true),
+        };
+
+        var windows = new (string Titel, int Typ, bool[] Haken)[]
+        {
+            ("Modem",             1, new[] { false, false, false, false, false, false }),
+            ("Breitband niedrig", 2, new[] { false, false, false, false, false, true  }),
+            ("Satellit",          3, new[] { false, false, true,  false, false, true  }),
+            ("Breitband hoch",    4, new[] { false, false, true,  false, false, true  }),
+            ("WAN",               5, new[] { true,  true,  true,  true,  true,  true  }),
+            ("LAN",               6, new[] { true,  true,  true,  true,  true,  true  }),
+        };
+
+        foreach (var rate in windows)
+        {
+            var preset = presets.FirstOrDefault(p => p.Title.StartsWith(rate.Titel, StringComparison.Ordinal));
+            if (preset is null)
+            {
+                Check($"es gibt eine Vorgabe \"{rate.Titel}\"", false);
+                continue;
+            }
+
+            var doc = RdpDocument.CreateDefault();
+            foreach (var (key, value) in preset.Values)
+                doc.Set(key, RdpCatalog.Find(key)?.Type ?? 's', value);
+
+            Check($"{rate.Titel}: die Übertragungsrate steht auf {rate.Typ}",
+                doc.GetInt("connection type", -1) == rate.Typ);
+
+            var abweichung = new List<string>();
+            for (var i = 0; i < felder.Length; i++)
+            {
+                var (key, invertiert) = felder[i];
+                var erwartet = rate.Haken[i] ^ invertiert ? 1 : 0;
+                var ist = doc.GetInt(key, -1);
+                if (ist != erwartet) abweichung.Add($"{key}={ist}, erwartet {erwartet}");
+            }
+
+            Check($"{rate.Titel}: die sechs Haken stehen wie in Windows",
+                abweichung.Count == 0, string.Join("; ", abweichung));
+
+            // Was der Dialog unterhalb des Kastens zeigt, gehört nicht zur
+            // Rate - eine Vorgabe darf es nicht mit umstellen.
+            Check($"{rate.Titel}: Bitmapspeicher und Wiederverbinden bleiben unberührt",
+                !preset.Values.ContainsKey("bitmapcachepersistenable")
+                && !preset.Values.ContainsKey("autoreconnection enabled"));
+        }
+
+        var automatisch = presets.First(p => p.Title.StartsWith("Automatisch", StringComparison.Ordinal));
+        Check("\"Automatisch erkennen\" schaltet das Messen ein",
+            automatisch.Values["connection type"] == "7"
+            && automatisch.Values["networkautodetect"] == "1"
+            && automatisch.Values["bandwidthautodetect"] == "1");
+
+        Check("\"Automatisch erkennen\" lässt die sechs Haken in Ruhe",
+            felder.All(f => !automatisch.Values.ContainsKey(f.Key)));
     }
 
     // ============================================================ Transport

@@ -74,11 +74,26 @@ steht an einer Stelle (`Services/RdpGroups.cs`); ein Test prüft, dass jeder
 Schlüssel des Katalogs in genau einem Kasten liegt und kein Kasten einen
 Schlüssel nennt, den es nicht gibt.
 
-**Vorgabeknöpfe über der Gruppe.** „LAN – alles an", „Breitband – Mittelweg",
-„Schmalband – alles aus", „Automatisch messen" setzen die Übertragungsrate und
-die sechs Darstellungsschalter in einem Zug. Genau das tut mstsc auch, wenn man
-die Übertragungsrate umstellt – nur ungefragt und ohne zu sagen, welche Zeilen
-es dabei ändert. Hier steht am Mauszeiger jede Zeile, die der Knopf schreibt.
+**Vorgabeknöpfe über der Gruppe – mit den Haken, die Windows setzt.** Ein Knopf
+je Übertragungsrate, und dahinter steht nicht meine Schätzung, sondern die
+abgelesene Zuordnung aus dem Dialog von mstsc:
+
+| Übertragungsrate | Hintergrund | Schrift­glättung | Desktop­gestaltung | Fenster­inhalt | Animation | Visuelle Stile |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| Modem (56 kBit/s) | – | – | – | – | – | – |
+| Breitband niedrig (256 kBit/s – 2 MBit/s) | – | – | – | – | – | ✓ |
+| Satellit (2 – 16 MBit/s) | – | – | ✓ | – | – | ✓ |
+| Breitband hoch (2 – 10 MBit/s) | – | – | ✓ | – | – | ✓ |
+| WAN (10 MBit/s+, hohe Latenz) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| LAN (10 MBit/s oder höher) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+Genau das tut mstsc auch, wenn man die Rate umstellt – nur ungefragt und ohne
+zu sagen, welche Zeilen es dabei ändert. Hier steht am Mauszeiger jede Zeile,
+die der Knopf schreibt. „Dauerhafte Bitmapzwischenspeicherung" und „Verbindung
+erneut herstellen" bleiben unberührt: Die stehen im Dialog unterhalb des
+Kastens und gehören nicht zur Rate. Ein Test führt dieselbe Tabelle in der
+Sicht des Dialogs noch einmal – wer die Vorgaben ändert, muss ihn mitändern.
+
 Für die Geräte gibt es dieselben Knöpfe: „Nichts weiterreichen", „Nur
 Zwischenablage", „Alle Laufwerke".
 

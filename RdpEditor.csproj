@@ -43,15 +43,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.1.1" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <!-- Kommt über Avalonia.Desktop transitiv herein und wird nur unter Linux
          benutzt. Ausdruecklich auf die neueste Fassung gehoben, deutlich über
          der für CVE-2026-39959 gepatchten 0.92.0. -->
-    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.0" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.1" />
   </ItemGroup>
 
   <!-- Das Testprojekt liegt unter tests\ und hat einen eigenen
