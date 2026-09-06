@@ -215,12 +215,51 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Status = $"Vorgabe \"{preset.Title}\" übernommen: {preset.Values.Count} Zeilen gesetzt.";
     }
 
+    /// <summary>Verhindert, dass das Mitsetzen der Schalter sich selbst wieder aufruft.</summary>
+    private bool _applyingRate;
+
+    /// <summary>
+    /// Die Übertragungsrate ist kein Vermerk, sondern ein Schalter: Wer sie
+    /// umstellt, dem setzt mstsc die sechs Kästchen darunter mit um. Genau das
+    /// geschieht hier auch - nur sichtbar, statt beim Speichern hinter dem
+    /// Rücken des Benutzers.
+    /// </summary>
+    private void ApplyRate(int connectionType)
+    {
+        var rate = RdpRates.Find(connectionType);
+        if (rate is null) return;
+
+        _applyingRate = true;
+        try
+        {
+            foreach (var (key, value) in rate.Values)
+                _doc.Set(key, RdpCatalog.Find(key)?.Type ?? 'i', value);
+        }
+        finally
+        {
+            _applyingRate = false;
+        }
+
+        Status = connectionType == 7
+            ? "Übertragungsrate \"Automatisch erkennen\": mstsc misst beim Verbinden selbst, "
+            + "die sechs Schalter bleiben, wie sie sind."
+            : $"Übertragungsrate \"{rate.Title}\": die sechs Schalter stehen jetzt so, wie "
+            + "Windows sie bei dieser Rate setzt.";
+    }
+
     /// <summary>
     /// Wird nach jeder Änderung aufgerufen, gleich aus welchem Reiter: Sie
     /// arbeiten alle auf derselben Datei und müssen einander sehen.
+    ///
+    /// <paramref name="key"/> nennt den geänderten Schlüssel - daran hängt die
+    /// eine Stelle, an der eine Änderung eine zweite nach sich zieht.
     /// </summary>
-    private void OnDocumentChanged()
+    private void OnDocumentChanged(string? key = null)
     {
+        if (key is not null && !_applyingRate
+            && string.Equals(key.Trim(), RdpRates.KeyConnectionType, StringComparison.OrdinalIgnoreCase))
+            ApplyRate(_doc.GetInt(RdpRates.KeyConnectionType, -1));
+
         IsDirty = true;
 
         foreach (var page in _settingPages)

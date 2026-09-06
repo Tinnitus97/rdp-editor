@@ -40,6 +40,10 @@ internal static class Program
         PruefeGruppen();
 
         Console.WriteLine();
+        Console.WriteLine("Übertragungsraten");
+        PruefeUebertragungsraten();
+
+        Console.WriteLine();
         Console.WriteLine("Transport");
         PruefeTransport();
 
@@ -357,7 +361,6 @@ internal static class Program
         Check("in ein Zahlenfeld schreibt keine Vorgabe Text",
             falscherWert.Count == 0, string.Join(", ", falscherWert));
 
-        PruefeUebertragungsraten(presets);
     }
 
     /// <summary>
@@ -369,74 +372,95 @@ internal static class Program
     /// Genau diese Umrechnung ist die Stelle, an der man sich vertut, und
     /// genau deshalb steht die Tabelle hier ein zweites Mal.
     /// </summary>
-    private static void PruefeUebertragungsraten(IReadOnlyList<RdpPreset> presets)
+    private static void PruefeUebertragungsraten()
     {
-        // Reihenfolge wie im Dialog: Desktophintergrund, Schriftartglättung,
-        // Desktopgestaltung, Fensterinhalt beim Ziehen, Menü- und
-        // Fensteranimation, visuelle Stile.
-        var felder = new (string Key, bool Invertiert)[]
+        var windows = new (int Typ, string Name, bool[] Haken)[]
         {
-            ("disable wallpaper", true),
-            ("allow font smoothing", false),
-            ("allow desktop composition", false),
-            ("disable full window drag", true),
-            ("disable menu anims", true),
-            ("disable themes", true),
+            (1, "Modem",             new[] { false, false, false, false, false, false }),
+            (2, "Breitband niedrig", new[] { false, false, false, false, false, true  }),
+            (3, "Satellit",          new[] { false, false, true,  false, false, true  }),
+            (4, "Breitband hoch",    new[] { false, false, true,  false, false, true  }),
+            (5, "WAN",               new[] { true,  true,  true,  true,  true,  true  }),
+            (6, "LAN",               new[] { true,  true,  true,  true,  true,  true  }),
         };
 
-        var windows = new (string Titel, int Typ, bool[] Haken)[]
-        {
-            ("Modem",             1, new[] { false, false, false, false, false, false }),
-            ("Breitband niedrig", 2, new[] { false, false, false, false, false, true  }),
-            ("Satellit",          3, new[] { false, false, true,  false, false, true  }),
-            ("Breitband hoch",    4, new[] { false, false, true,  false, false, true  }),
-            ("WAN",               5, new[] { true,  true,  true,  true,  true,  true  }),
-            ("LAN",               6, new[] { true,  true,  true,  true,  true,  true  }),
-        };
+        Check("die sechs Kästchen des Dialogs sind hinterlegt", RdpRates.Switches.Length == 6);
 
         foreach (var rate in windows)
         {
-            var preset = presets.FirstOrDefault(p => p.Title.StartsWith(rate.Titel, StringComparison.Ordinal));
-            if (preset is null)
+            var eintrag = RdpRates.Find(rate.Typ);
+            if (eintrag is null)
             {
-                Check($"es gibt eine Vorgabe \"{rate.Titel}\"", false);
+                Check($"es gibt eine Rate {rate.Typ} ({rate.Name})", false);
                 continue;
             }
 
+            // Anwenden, wie es das Fenster tut.
             var doc = RdpDocument.CreateDefault();
-            foreach (var (key, value) in preset.Values)
-                doc.Set(key, RdpCatalog.Find(key)?.Type ?? 's', value);
-
-            Check($"{rate.Titel}: die Übertragungsrate steht auf {rate.Typ}",
-                doc.GetInt("connection type", -1) == rate.Typ);
+            doc.SetInt(RdpRates.KeyConnectionType, rate.Typ);
+            foreach (var (key, value) in eintrag.Values)
+                doc.Set(key, RdpCatalog.Find(key)?.Type ?? 'i', value);
 
             var abweichung = new List<string>();
-            for (var i = 0; i < felder.Length; i++)
+            for (var i = 0; i < RdpRates.Switches.Length; i++)
             {
-                var (key, invertiert) = felder[i];
+                var (key, invertiert) = RdpRates.Switches[i];
                 var erwartet = rate.Haken[i] ^ invertiert ? 1 : 0;
                 var ist = doc.GetInt(key, -1);
                 if (ist != erwartet) abweichung.Add($"{key}={ist}, erwartet {erwartet}");
             }
 
-            Check($"{rate.Titel}: die sechs Haken stehen wie in Windows",
+            Check($"{rate.Name}: die sechs Haken stehen wie in Windows",
                 abweichung.Count == 0, string.Join("; ", abweichung));
 
-            // Was der Dialog unterhalb des Kastens zeigt, gehört nicht zur
-            // Rate - eine Vorgabe darf es nicht mit umstellen.
-            Check($"{rate.Titel}: Bitmapspeicher und Wiederverbinden bleiben unberührt",
-                !preset.Values.ContainsKey("bitmapcachepersistenable")
-                && !preset.Values.ContainsKey("autoreconnection enabled"));
+            Check($"{rate.Name}: eine feste Rate schaltet das Messen aus",
+                doc.GetInt("networkautodetect", -1) == 0 && doc.GetInt("bandwidthautodetect", -1) == 0);
+
+            // Was im Dialog unterhalb des Kastens steht, gehört nicht zur Rate.
+            Check($"{rate.Name}: Bitmapspeicher und Wiederverbinden bleiben unberührt",
+                !eintrag.Values.ContainsKey("bitmapcachepersistenable")
+                && !eintrag.Values.ContainsKey("autoreconnection enabled")
+                && !eintrag.Values.ContainsKey("disable cursor setting"));
         }
 
-        var automatisch = presets.First(p => p.Title.StartsWith("Automatisch", StringComparison.Ordinal));
+        var automatisch = RdpRates.Find(7);
         Check("\"Automatisch erkennen\" schaltet das Messen ein",
-            automatisch.Values["connection type"] == "7"
+            automatisch is not null
             && automatisch.Values["networkautodetect"] == "1"
             && automatisch.Values["bandwidthautodetect"] == "1");
 
         Check("\"Automatisch erkennen\" lässt die sechs Haken in Ruhe",
-            felder.All(f => !automatisch.Values.ContainsKey(f.Key)));
+            automatisch is not null
+            && RdpRates.Switches.All(sw => !automatisch.Values.ContainsKey(sw.Key)));
+
+        // Auswahlliste und Ratentabelle müssen dieselben Werte kennen - sonst
+        // stünde im Feld eine Rate, zu der niemand die Haken kennt.
+        var auswahl = RdpCatalog.Find(RdpRates.KeyConnectionType)?.Choices ?? new List<RdpChoice>();
+        var ohneTabelle = auswahl
+            .Where(c => !int.TryParse(c.Value, out var v) || RdpRates.Find(v) is null)
+            .Select(c => c.Value)
+            .ToList();
+
+        Check("zu jeder Rate der Auswahlliste gibt es eine Zeile in der Tabelle",
+            ohneTabelle.Count == 0, string.Join(", ", ohneTabelle));
+
+        var ohneAuswahl = RdpRates.All
+            .Where(r => auswahl.All(c => c.Value != r.ConnectionType.ToString()))
+            .Select(r => r.ConnectionType.ToString())
+            .ToList();
+
+        Check("jede Rate der Tabelle steht auch in der Auswahlliste",
+            ohneAuswahl.Count == 0, string.Join(", ", ohneAuswahl));
+
+        // Und die Beschriftung ist dieselbe wie im Dialog von mstsc.
+        var andererName = RdpRates.All
+            .Where(r => auswahl.FirstOrDefault(c => c.Value == r.ConnectionType.ToString()) is { } c
+                     && c.Label != r.Title)
+            .Select(r => r.Title)
+            .ToList();
+
+        Check("Auswahlliste und Tabelle tragen dieselben Beschriftungen",
+            andererName.Count == 0, string.Join(" | ", andererName));
     }
 
     // ============================================================ Transport

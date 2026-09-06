@@ -67,7 +67,7 @@ public sealed partial class MonitorTileViewModel : ObservableObject
 public sealed partial class MonitorsPageViewModel : PageViewModel
 {
     private readonly RdpDocument _doc;
-    private readonly Action _changed;
+    private readonly Action<string?> _changed;
 
     /// <summary>Die gewählten Nummern in der Reihenfolge der Auswahl.</summary>
     private readonly List<int> _order = new();
@@ -78,7 +78,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
     public const double MapWidth = 640;
     public const double MapHeight = 250;
 
-    public MonitorsPageViewModel(RdpDocument doc, Action changed) : base("Bildschirme")
+    public MonitorsPageViewModel(RdpDocument doc, Action<string?> changed) : base("Bildschirme")
     {
         _doc = doc;
         _changed = changed;
@@ -271,7 +271,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
         MonitorSelection.Apply(_doc, _order, Monitors.Count);
         ManualText = MonitorSelection.Format(_order);
         UpdateTiles();
-        _changed();
+        _changed(MonitorSelection.KeySelected);
     }
 
     private void UpdateTiles()

@@ -28,6 +28,7 @@
     <Compile Include="../../Services/RdpCatalog.cs" />
     <Compile Include="../../Services/MonitorSelection.cs" />
     <Compile Include="../../Services/RdpGroups.cs" />
+    <Compile Include="../../Services/RdpRates.cs" />
     <Compile Include="../../Services/UdpTransport.cs" />
   </ItemGroup>
 

@@ -116,9 +116,9 @@ public static class RdpCatalog
         Toggle("disableconnectionsharing", CatConnection, "Verbindung nicht wiederverwenden",
              "1 öffnet auch dann ein neues Fenster, wenn zu diesem Server schon eine Sitzung "
            + "läuft. Sonst wird die bestehende benutzt."),
-        Toggle("autoreconnection enabled", CatConnection, "Automatisch neu verbinden",
+        Toggle("autoreconnection enabled", CatPerformance, "Automatisch neu verbinden",
              "Bei einem kurzen Netzausfall verbindet sich mstsc von selbst wieder."),
-        Number("autoreconnect max retries", CatConnection, "Versuche beim Neuverbinden",
+        Number("autoreconnect max retries", CatPerformance, "Versuche beim Neuverbinden",
              "Wie oft es die automatische Wiederverbindung versucht. Voreinstellung 20."),
         Text("loadbalanceinfo", CatConnection, "Lastverteilung",
              "Kennung für den Verbindungsbroker einer Sitzungssammlung, etwa "

@@ -20,12 +20,12 @@ namespace RdpEditor.ViewModels;
 public sealed partial class SettingViewModel : ObservableObject
 {
     private readonly RdpDocument _doc;
-    private readonly Action _changed;
+    private readonly Action<string?> _changed;
 
     /// <summary>Während des Einlesens aus der Datei nicht zurückschreiben.</summary>
     private bool _loading;
 
-    public SettingViewModel(RdpSetting definition, RdpDocument doc, Action changed)
+    public SettingViewModel(RdpSetting definition, RdpDocument doc, Action<string?> changed)
     {
         Definition = definition;
         _doc = doc;
@@ -118,7 +118,7 @@ public sealed partial class SettingViewModel : ObservableObject
 
         _doc.Remove(Key);
         OnPropertyChanged(nameof(StateText));
-        _changed();
+        _changed(Key);
     }
 
     partial void OnTextValueChanged(string value)
@@ -165,7 +165,7 @@ public sealed partial class SettingViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(StateText));
-        _changed();
+        _changed(Key);
     }
 
     // ======================================================== Suche

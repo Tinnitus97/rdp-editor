@@ -43,87 +43,6 @@ public static class RdpGroups
         return new RdpPreset(title, hint, values);
     }
 
-    /// <summary>
-    /// Die Übertragungsraten aus dem Dialog von mstsc - mit genau den Haken,
-    /// die Windows dabei setzt.
-    ///
-    /// Die Zuordnung ist abgelesen, nicht geraten: Für jede der sechs Raten
-    /// wurde der Dialog geöffnet und notiert, welche der sechs Kästchen danach
-    /// gefüllt sind. Der Test dazu führt dieselbe Tabelle noch einmal in der
-    /// Sicht des Dialogs; wer hier etwas ändert, muss sie dort mitändern.
-    ///
-    /// ACHTUNG, umgekehrte Zählweise: Vier der sechs Schlüssel heißen in der
-    /// Datei "disable ...". Ein gefülltes Kästchen im Dialog ist dort eine 0.
-    ///
-    ///                                     Modem  Breit-   Satel-  Breit-  WAN  LAN
-    ///                                            band     lit     band
-    ///                                            niedrig          hoch
-    ///   Desktophintergrund                  -      -        -       -      x    x
-    ///   Schriftartglättung                  -      -        -       -      x    x
-    ///   Desktopgestaltung                   -      -        x       x      x    x
-    ///   Fensterinhalt beim Ziehen           -      -        -       -      x    x
-    ///   Menü- und Fensteranimation          -      -        -       -      x    x
-    ///   Visuelle Stile                      -      x        x       x      x    x
-    ///
-    /// Nicht dabei sind "Dauerhafte Bitmapzwischenspeicherung" und
-    /// "Verbindung erneut herstellen": Die stehen im Dialog unterhalb des
-    /// Kastens und bleiben von der Rate unberührt. Ebenso "disable cursor
-    /// setting" - dafür hat der Dialog gar kein Kästchen.
-    /// </summary>
-    private static RdpPreset Rate(string title, string hint, int connectionType,
-                                  bool wallpaper, bool fontSmoothing, bool composition,
-                                  bool fullWindowDrag, bool menuAnims, bool themes)
-        => Preset(title, hint,
-                  "connection type", connectionType.ToString(),
-                  // Eine feste Rate schließt das Messen aus - sonst überschriebe
-                  // die Messung beim Verbinden gerade das, was hier gewählt wurde.
-                  "networkautodetect", "0",
-                  "bandwidthautodetect", "0",
-                  // Erlaubt heißt in der Datei: NICHT abgeschaltet.
-                  "disable wallpaper", wallpaper ? "0" : "1",
-                  "allow font smoothing", fontSmoothing ? "1" : "0",
-                  "allow desktop composition", composition ? "1" : "0",
-                  "disable full window drag", fullWindowDrag ? "0" : "1",
-                  "disable menu anims", menuAnims ? "0" : "1",
-                  "disable themes", themes ? "0" : "1");
-
-    private static readonly RdpPreset[] LeistungsPresets =
-    {
-        Rate("Modem (56 kBit/s)",
-             "Wie Windows es setzt: keine einzige Zugabe.",
-             1, false, false, false, false, false, false),
-
-        Rate("Breitband niedrig (256 kBit/s - 2 MBit/s)",
-             "Wie Windows es setzt: nur die visuellen Stile, sonst nichts.",
-             2, false, false, false, false, false, true),
-
-        Rate("Satellit (2 - 16 MBit/s)",
-             "Wie Windows es setzt: Desktopgestaltung und visuelle Stile. "
-           + "Für Leitungen mit viel Bandbreite und langer Laufzeit.",
-             3, false, false, true, false, false, true),
-
-        Rate("Breitband hoch (2 - 10 MBit/s)",
-             "Wie Windows es setzt: Desktopgestaltung und visuelle Stile - "
-           + "derselbe Satz wie beim Satelliten.",
-             4, false, false, true, false, false, true),
-
-        Rate("WAN (10 MBit/s oder höher, hohe Latenz)",
-             "Wie Windows es setzt: alle sechs erlaubt.",
-             5, true, true, true, true, true, true),
-
-        Rate("LAN (10 MBit/s oder höher)",
-             "Wie Windows es setzt: alle sechs erlaubt.",
-             6, true, true, true, true, true, true),
-
-        Preset("Automatisch erkennen",
-               "mstsc misst die Leitung beim Verbinden selbst. Die sechs Schalter darunter "
-             + "bleiben, wie sie sind - im Dialog von Windows sind sie in diesem Fall nicht "
-             + "die Auskunft, sondern die Messung ist es.",
-               "connection type", "7",
-               "networkautodetect", "1",
-               "bandwidthautodetect", "1"),
-    };
-
     private static readonly RdpPreset[] GeraetePresets =
     {
         Preset("Nichts weiterreichen",
@@ -164,8 +83,7 @@ public static class RdpGroups
 
         new(RdpCatalog.CatConnection, "Sitzung",
             "Wie sich die Verbindung verhält, während sie steht.",
-            new[] { "administrative session", "disableconnectionsharing",
-                    "autoreconnection enabled", "autoreconnect max retries" }),
+            new[] { "administrative session", "disableconnectionsharing" }),
 
         new(RdpCatalog.CatConnection, "Verbindungsbroker und Arbeitsbereich",
             "Nur belegt, wenn die Datei aus einer Sitzungssammlung oder einem RemoteApp-Portal "
@@ -213,24 +131,26 @@ public static class RdpGroups
 
         // ========================================================== Leistung
         new(RdpCatalog.CatPerformance, "Übertragungsrate",
-            "Ein Knopf setzt die Rate und die sechs Darstellungsschalter darunter in einem Zug - "
-          + "mit genau den Haken, die auch Windows bei dieser Rate setzt. Was der Knopf "
-          + "schreibt, steht am Mauszeiger.",
-            new[] { "connection type", "networkautodetect", "bandwidthautodetect" },
-            LeistungsPresets),
+            "Wie im Dialog von mstsc: Die Rate ist kein Vermerk, sondern ein Schalter. Wer sie "
+          + "umstellt, dem setzt dieser Editor die sechs Kästchen darunter mit um - mit genau "
+          + "den Haken, die auch Windows bei dieser Rate setzt. Der Unterschied ist nur, dass "
+          + "man hier zusehen kann.",
+            new[] { "connection type", "networkautodetect", "bandwidthautodetect" }),
 
         new(RdpCatalog.CatPerformance, "Folgendes zulassen",
-            "ACHTUNG, umgekehrte Zählweise: In der Datei heißen die meisten dieser Schlüssel "
-          + "\"disable ...\". Ein Haken hier bedeutet deshalb ABGESCHALTET, im mstsc-Dialog "
+            "ACHTUNG, umgekehrte Zählweise: Vier dieser Schlüssel heißen in der Datei "
+          + "\"disable ...\". Ein Haken hier bedeutet deshalb ABGESCHALTET, im Dialog von mstsc "
           + "bedeutet ein Haken das Gegenteil. Die Beschriftung sagt jeweils, was der Haken tut.",
             new[] { "disable wallpaper", "allow font smoothing", "allow desktop composition",
-                    "disable full window drag", "disable menu anims", "disable themes",
-                    "disable cursor setting" }),
+                    "disable full window drag", "disable menu anims", "disable themes" }),
 
-        new(RdpCatalog.CatPerformance, "Zwischenspeicher und Video",
-            "Was nicht die Darstellung betrifft, sondern den Weg der Daten.",
-            new[] { "compression", "bitmapcachepersistenable", "bitmapcachesize",
-                    "videoplaybackmode" }),
+        new(RdpCatalog.CatPerformance, "Unabhängig von der Übertragungsrate",
+            "Was im Dialog von mstsc unterhalb des Kastens steht und beim Umstellen der Rate "
+          + "unberührt bleibt. \"Zeigerschatten\" gehört auch dazu - dafür hat der Dialog gar "
+          + "kein Kästchen, die Datei aber einen Schlüssel.",
+            new[] { "bitmapcachepersistenable", "autoreconnection enabled",
+                    "autoreconnect max retries", "compression", "bitmapcachesize",
+                    "videoplaybackmode", "disable cursor setting" }),
 
         // ========================================================= Sicherheit
         new(RdpCatalog.CatSecurity, "Serverprüfung",

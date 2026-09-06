@@ -74,9 +74,11 @@ steht an einer Stelle (`Services/RdpGroups.cs`); ein Test prüft, dass jeder
 Schlüssel des Katalogs in genau einem Kasten liegt und kein Kasten einen
 Schlüssel nennt, den es nicht gibt.
 
-**Vorgabeknöpfe über der Gruppe – mit den Haken, die Windows setzt.** Ein Knopf
-je Übertragungsrate, und dahinter steht nicht meine Schätzung, sondern die
-abgelesene Zuordnung aus dem Dialog von mstsc:
+**Die Übertragungsrate setzt die Haken mit – wie in mstsc.** Der Reiter
+„Leistung" ist gebaut wie der Dialog von Windows: oben die Auswahlliste, darunter
+der Kasten „Folgendes zulassen". Und wie dort ist die Rate kein Vermerk, sondern
+ein Schalter — wer sie umstellt, dem springen die sechs Kästchen darunter auf
+den Stand, den Windows für diese Rate vorsieht:
 
 | Übertragungsrate | Hintergrund | Schrift­glättung | Desktop­gestaltung | Fenster­inhalt | Animation | Visuelle Stile |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -87,15 +89,21 @@ abgelesene Zuordnung aus dem Dialog von mstsc:
 | WAN (10 MBit/s+, hohe Latenz) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | LAN (10 MBit/s oder höher) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-Genau das tut mstsc auch, wenn man die Rate umstellt – nur ungefragt und ohne
-zu sagen, welche Zeilen es dabei ändert. Hier steht am Mauszeiger jede Zeile,
-die der Knopf schreibt. „Dauerhafte Bitmapzwischenspeicherung" und „Verbindung
-erneut herstellen" bleiben unberührt: Die stehen im Dialog unterhalb des
-Kastens und gehören nicht zur Rate. Ein Test führt dieselbe Tabelle in der
-Sicht des Dialogs noch einmal – wer die Vorgaben ändert, muss ihn mitändern.
+Der Unterschied zu mstsc ist nur, dass man hier zusehen kann: Die Haken
+springen sichtbar, und in der Fußzeile steht, dass es geschehen ist. Die
+Zuordnung ist abgelesen, nicht geschätzt, und ein Test führt dieselbe Tabelle
+in der Sicht des Dialogs noch einmal – wer sie ändert, muss ihn mitändern.
 
-Für die Geräte gibt es dieselben Knöpfe: „Nichts weiterreichen", „Nur
-Zwischenablage", „Alle Laufwerke".
+„Dauerhafte Bitmapzwischenspeicherung" und „Verbindung erneut herstellen"
+bleiben unberührt: Die stehen im Dialog unterhalb des Kastens und gehören nicht
+zur Rate. Im Editor stehen sie deshalb in einer eigenen Gruppe „Unabhängig von
+der Übertragungsrate". Und „Automatisch erkennen" lässt die sechs Kästchen in
+Ruhe – dann entscheidet die Messung beim Verbinden.
+
+**Vorgabeknöpfe** gibt es dort, wo Windows keine Liste anbietet: über der
+Gruppe „Laufwerke und USB" stehen „Nichts weiterreichen", „Nur Zwischenablage"
+und „Alle Laufwerke" – am Mauszeiger jeweils mit den Zeilen, die der Knopf
+schreibt.
 
 **Achtung, umgekehrte Zählweise.** Im mstsc-Dialog heißt es „Desktophintergrund
 [x] zulassen"; in der Datei steht dafür `disable wallpaper:i:0`. Die Gruppe
