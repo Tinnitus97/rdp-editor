@@ -178,7 +178,7 @@
                             <TextBlock Classes="section" Text="Nummern von Hand"/>
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <TextBox Classes="field" Width="220"
-                                         Watermark="z. B. 0,1"
+                                         PlaceholderText="z. B. 0,1"
                                          Text="{Binding ManualText, Mode=TwoWay}"/>
                                 <Button Classes="action" Content="Uebernehmen"
                                         Command="{Binding ApplyManualCommand}"/>
@@ -268,7 +268,7 @@
         <!-- ============ Suche ============ -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="2,0,2,6">
             <TextBox Grid.Column="0" Classes="field"
-                     Watermark="Suchen - im Schluessel, in der Beschriftung und im Hinweis"
+                     PlaceholderText="Suchen - im Schluessel, in der Beschriftung und im Hinweis"
                      Text="{Binding SearchText, Mode=TwoWay}"/>
             <Button Grid.Column="1" Classes="secondary" Margin="5,0,0,0"
                     Content="Leeren" Command="{Binding ClearSearchCommand}"/>
