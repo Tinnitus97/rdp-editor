@@ -1,0 +1,79 @@
+name: Bauen und prüfen
+
+# Läuft bei jedem Push und jedem Pull Request.
+# Zweck: Übersetzt der Quelltext noch, und laufen die Prüfungen durch?
+
+on:
+  push:
+    branches: [ '**' ]
+    paths-ignore: [ '**/*.md' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Die Dienste ohne Oberfläche - läuft auf Linux und ist in Sekunden durch.
+  pruefungen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # Vorgeschaltet und in Sekunden durch: Ist jede .axaml überhaupt
+      # wohlgeformtes XML? Der Avalonia-Übersetzer merkt das auch - aber erst
+      # auf dem Windows-Läufer, eine Minute später.
+      - name: XAML auf Wohlgeformtheit prüfen
+        run: |
+          python3 - <<'PY'
+          import sys, xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          fehler = 0
+          for datei in sorted(Path('.').rglob('*.axaml')):
+              try:
+                  ET.parse(datei)
+                  print(f'  [OK]   {datei}')
+              except ET.ParseError as ex:
+                  print(f'::error file={datei}::{ex}')
+                  fehler += 1
+          sys.exit(1 if fehler else 0)
+          PY
+
+      - name: Prüfungen ausführen
+        run: dotnet run --project tests/RdpEditorTests -c Release
+
+  # Das Programm selbst zielt auf Windows und braucht deshalb einen
+  # Windows-Läufer.
+  uebersetzen:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Kompilieren
+        shell: pwsh
+        run: dotnet build RdpEditor.csproj -c Release
+
+      # Eine einzelne EXE ohne Installation und ohne vorausgesetzte
+      # Laufzeitumgebung - so, wie sie später verteilt wird.
+      - name: Veröffentlichen
+        shell: pwsh
+        run: |
+          dotnet publish RdpEditor.csproj -c Release -r win-x64 -o publish `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:DebugType=none -p:DebugSymbols=false
+          if (-not (Test-Path 'publish/RdpEditor.exe')) { throw 'RdpEditor.exe wurde nicht erzeugt.' }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RdpEditor
+          path: publish/RdpEditor.exe
+          retention-days: 30

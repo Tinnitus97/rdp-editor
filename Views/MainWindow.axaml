@@ -1,0 +1,299 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RdpEditor.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="RdpEditor.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding WindowTitle}"
+        MinWidth="900" MinHeight="560"
+        Width="1080" Height="720"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource BaseBrush}">
+
+    <!--
+        AUFBAU
+
+        Oben die Werkzeugleiste, darunter das Suchfeld, in der Mitte die
+        Reiter, unten eine Zeile Auskunft.
+
+        Die Reiter kommen aus der Liste "Pages" des ViewModels. Welche Vorlage
+        ein Reiter benutzt, entscheidet sein Typ - die drei Vorlagen unten in
+        Window.DataTemplates. So steht der Sonderfall "Bildschirme" neben den
+        gewoehnlichen Einstellungsseiten, ohne dass eine der beiden von der
+        anderen weiss.
+    -->
+
+    <Window.DataTemplates>
+
+        <!-- ============================================================
+             Eine Einstellung: Beschriftung links, Bedienung in der Mitte,
+             rechts der Haken "steht in der Datei".
+             ============================================================ -->
+        <DataTemplate DataType="vm:SettingViewModel">
+            <Border Classes="entryCard"
+                    Classes.unset="{Binding !IsPresent}"
+                    IsVisible="{Binding IsVisible}">
+                <Grid ColumnDefinitions="*,250,Auto">
+
+                    <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <TextBlock Classes="entryTitle" Text="{Binding Label}"/>
+                        <TextBlock Classes="entryKey" Text="{Binding KeyLine}"/>
+                        <TextBlock Classes="entryHint" Text="{Binding Hint}"/>
+                    </StackPanel>
+
+                    <!-- Immer nur eine der vier Bedienungen ist sichtbar; welche,
+                         sagt der Katalog. -->
+                    <Panel Grid.Column="1" VerticalAlignment="Center">
+                        <CheckBox Classes="opt"
+                                  IsVisible="{Binding IsToggle}"
+                                  IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                  Content="eingeschaltet (1)"/>
+
+                        <ComboBox Classes="quick"
+                                  IsVisible="{Binding IsChoice}"
+                                  ItemsSource="{Binding Choices}"
+                                  SelectedItem="{Binding SelectedChoice, Mode=TwoWay}"/>
+
+                        <TextBox Classes="field"
+                                 Classes.invalid="{Binding HasError}"
+                                 IsVisible="{Binding IsNumber}"
+                                 Text="{Binding TextValue, Mode=TwoWay}"/>
+
+                        <TextBox Classes="field"
+                                 IsVisible="{Binding IsText}"
+                                 Text="{Binding TextValue, Mode=TwoWay}"/>
+                    </Panel>
+
+                    <CheckBox Grid.Column="2" Classes="opt"
+                              Margin="12,0,2,0" VerticalAlignment="Center"
+                              Content="in Datei"
+                              IsChecked="{Binding IsPresent, Mode=TwoWay}"
+                              ToolTip.Tip="Ohne Haken fehlt der Schluessel in der Datei. Das ist nicht dasselbe wie 'aus' - dann entscheidet mstsc."/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- ============================================================
+             Eine Seite voller Einstellungen.
+             ============================================================ -->
+        <DataTemplate DataType="vm:SettingsPageViewModel">
+            <Grid RowDefinitions="*,Auto" Margin="8">
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
+                    <ItemsControl ItemsSource="{Binding Settings}"/>
+                </ScrollViewer>
+
+                <TextBlock Grid.Row="1" Classes="entryHint" Margin="4,6,0,0"
+                           IsVisible="{Binding IsEmpty}"
+                           Text="Hier passt nichts zur Suche."/>
+            </Grid>
+        </DataTemplate>
+
+        <!-- ============================================================
+             Die Bildschirme. Oben der Plan, darunter, was daraus in der
+             Datei wird.
+             ============================================================ -->
+        <DataTemplate DataType="vm:MonitorsPageViewModel">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
+                <StackPanel Margin="8" Spacing="8">
+
+                    <Border Classes="hintband">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section" Margin="0"
+                                       Text="Welche Bildschirme benutzt die Sitzung?"/>
+                            <TextBlock Classes="hintText"
+                                       Text="Anklicken waehlt einen Bildschirm aus oder ab. Der erste gewaehlte wird der Hauptbildschirm der Sitzung - dort erscheinen Anmeldung und Taskleiste."/>
+                            <TextBlock Classes="hintText" Text="{Binding ScanText}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Classes="secondary" Content="Alle"
+                                Command="{Binding SelectAllCommand}"/>
+                        <Button Classes="secondary" Content="Keinen (ein Bildschirm)"
+                                Command="{Binding SelectNoneCommand}"/>
+                        <Button Classes="secondary" Content="Nur Hauptbildschirm"
+                                Command="{Binding SelectPrimaryCommand}"/>
+                        <Button Classes="secondary" Content="Neu einlesen"
+                                Command="{Binding RescanCommand}"/>
+                        <Button Classes="secondary" Content="Nummern von Windows zeigen (mstsc /l)"
+                                Command="{Binding ShowWindowsListCommand}"/>
+                    </StackPanel>
+
+                    <!-- Der Plan. Jede Kachel liegt massstaeblich dort, wo der
+                         Bildschirm in der Anzeigeeinstellung von Windows liegt. -->
+                    <Border Classes="panel" Padding="0" IsVisible="{Binding HasMonitors}">
+                        <ItemsControl ItemsSource="{Binding Monitors}"
+                                      Width="640" Height="250" ClipToBounds="True">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <!-- Die Lage der Kachel auf der Flaeche steht am
+                                 Behaelter, nicht an der Kachel selbst. -->
+                            <ItemsControl.ItemContainerTheme>
+                                <ControlTheme TargetType="ContentPresenter" x:CompileBindings="False">
+                                    <Setter Property="Canvas.Left" Value="{Binding MapX}"/>
+                                    <Setter Property="Canvas.Top" Value="{Binding MapY}"/>
+                                </ControlTheme>
+                            </ItemsControl.ItemContainerTheme>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MonitorTileViewModel">
+                                    <Border Classes="monitorTile"
+                                            Classes.picked="{Binding IsSelected}"
+                                            Width="{Binding MapWidth}"
+                                            Height="{Binding MapHeight}"
+                                            Tapped="MonitorTile_Tapped"
+                                            ToolTip.Tip="{Binding Details}">
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Classes="monitorId" Text="{Binding IdText}"/>
+                                            <TextBlock Text="{Binding Geometry}"/>
+                                            <TextBlock Text="{Binding OrderText}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+
+                    <Border Classes="hintband">
+                        <TextBlock Classes="hintText" Text="{Binding ResultText}"/>
+                    </Border>
+
+                    <Border Classes="warning" IsVisible="{Binding HasWarning}">
+                        <TextBlock Classes="warningText" Text="{Binding WarningText}"/>
+                    </Border>
+
+                    <!-- Die Liste der Bildschirme im Klartext - und die
+                         Moeglichkeit, Nummern einzutippen, die es an diesem
+                         Rechner gar nicht gibt. Wer eine Datei fuer einen
+                         anderen Arbeitsplatz vorbereitet, braucht genau das. -->
+                    <Border Classes="panel">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="section" Text="Nummern von Hand"/>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBox Classes="field" Width="220"
+                                         Watermark="z. B. 0,1"
+                                         Text="{Binding ManualText, Mode=TwoWay}"/>
+                                <Button Classes="action" Content="Uebernehmen"
+                                        Command="{Binding ApplyManualCommand}"/>
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding Monitors}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:MonitorTileViewModel">
+                                        <Border Classes="entryCard">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                                <Border Grid.Column="0" Classes="tagBadge" Margin="0,0,8,0">
+                                                    <TextBlock Classes="tagBadgeText" Text="{Binding IdText}"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Classes="entryTitle" Text="{Binding FriendlyName}"/>
+                                                    <TextBlock Classes="entryKey" Text="{Binding Details}"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Classes="entryHint"
+                                                           VerticalAlignment="Center" Margin="8,0"
+                                                           Text="{Binding OrderText}"/>
+                                                <Button Grid.Column="3" Classes="secondary"
+                                                        Content="Als erster"
+                                                        IsVisible="{Binding IsSelected}"
+                                                        Command="{Binding MakeFirstCommand}"
+                                                        ToolTip.Tip="Macht diesen Bildschirm zum Hauptbildschirm der Sitzung."/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+        </DataTemplate>
+
+        <!-- ============================================================
+             Die Rohansicht.
+             ============================================================ -->
+        <DataTemplate DataType="vm:RawPageViewModel">
+            <Grid RowDefinitions="Auto,*,Auto" Margin="8">
+                <TextBlock Grid.Row="0" Classes="entryHint" Margin="2,0,2,6"
+                           Text="Die Datei, wie sie gespeichert wird: UTF-16 LE mit Byte-Order-Mark und CRLF am Zeilenende - genau die Form, die mstsc selbst schreibt. Aenderungen hier wirken erst nach 'Uebernehmen'."/>
+
+                <TextBox Grid.Row="1" Classes="mono"
+                         Text="{Binding RawText, Mode=TwoWay}"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         VerticalAlignment="Stretch"/>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6" Margin="0,6,0,0">
+                    <Button Classes="action" Content="Uebernehmen"
+                            Command="{Binding ApplyCommand}"/>
+                    <Button Classes="secondary" Content="Zuruecksetzen"
+                            Command="{Binding RevertCommand}"/>
+                    <TextBlock Classes="entryHint" VerticalAlignment="Center"
+                               Text="{Binding Status}"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+    </Window.DataTemplates>
+
+    <Grid Margin="9" RowDefinitions="Auto,Auto,Auto,*,Auto">
+
+        <!-- ============ Kopfzeile ============ -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="2,0,2,7">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Classes="appTitle" Text="{Binding WindowTitle}"/>
+                <TextBlock Classes="appSubtitle" Text="{Binding SubTitle}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal"
+                        VerticalAlignment="Center" Spacing="5">
+                <Button Classes="secondary" Content="Neu" Command="{Binding NewCommand}"/>
+                <Button Classes="secondary" Content="Oeffnen" Command="{Binding OpenCommand}"/>
+                <Button Classes="action" Content="Speichern" Command="{Binding SaveCommand}"/>
+                <Button Classes="secondary" Content="Speichern unter" Command="{Binding SaveAsCommand}"/>
+                <Button Classes="secondary" Content="Mit mstsc oeffnen" Command="{Binding StartMstscCommand}"/>
+                <Button Classes="secondary" Width="34" Content="{Binding ThemeIcon}"
+                        FontSize="14" ToolTip.Tip="Hell-/Dunkelmodus"
+                        Command="{Binding ToggleThemeCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ============ Suche ============ -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="2,0,2,6">
+            <TextBox Grid.Column="0" Classes="field"
+                     Watermark="Suchen - im Schluessel, in der Beschriftung und im Hinweis"
+                     Text="{Binding SearchText, Mode=TwoWay}"/>
+            <Button Grid.Column="1" Classes="secondary" Margin="5,0,0,0"
+                    Content="Leeren" Command="{Binding ClearSearchCommand}"/>
+        </Grid>
+
+        <!-- ============ Warnung fuer signierte Dateien ============ -->
+        <Border Grid.Row="2" Classes="warning" Margin="2,0,2,6" Padding="8,5"
+                IsVisible="{Binding HasSignature}">
+            <TextBlock Classes="warningText" Text="{Binding SignatureWarning}"/>
+        </Border>
+
+        <!-- ============ Die Reiter ============ -->
+        <TabControl Grid.Row="3" ItemsSource="{Binding Pages}" Padding="0">
+            <TabControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PageViewModel">
+                    <TextBlock Text="{Binding Header}"/>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+        </TabControl>
+
+        <!-- ============ Fusszeile ============ -->
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="4,7,4,0">
+            <TextBlock Grid.Column="0" Classes="entryHint" Text="{Binding Status}"/>
+            <TextBlock Grid.Column="1" Classes="entryKey" Text="{Binding CountText}"/>
+        </Grid>
+
+    </Grid>
+</Window>

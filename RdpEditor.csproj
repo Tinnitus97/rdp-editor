@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    RDP-Editor: aendert die Einstellungen einer .rdp-Datei, auch die, fuer die
+    mstsc keine Schaltflaeche hat.
+
+    Der Anlass ist "selectedmonitors": Die Verbindungsanzeige von mstsc kennt
+    nur "alle Monitore verwenden" oder eben nicht. Welche Monitore die Sitzung
+    benutzt, steht ausschliesslich in der Datei - und dort schreibt es mstsc
+    nie von selbst hinein.
+
+    Gebaut wie COMPULANInstall: .NET 10 mit Avalonia, veroeffentlicht als eine
+    einzelne, eigenstaendige EXE ohne Installation.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+    <AssemblyName>RdpEditor</AssemblyName>
+    <RootNamespace>RdpEditor</RootNamespace>
+    <Product>RDP-Editor</Product>
+    <AssemblyTitle>RDP-Editor</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <Description>Bearbeitet alle Einstellungen einer .rdp-Datei - auch die, die mstsc nicht anbietet</Description>
+
+    <!-- Herausgeber-Angaben. Sie landen in den Dateieigenschaften der EXE und
+         in den Dialogen von SmartScreen; ohne sie steht dort nichts. -->
+    <Company>Tino Quitsch</Company>
+    <Authors>Tino Quitsch</Authors>
+    <Copyright>Copyright (c) 2026 Tino Quitsch</Copyright>
+
+    <!-- Debug-Symbole (.pdb) nicht mit ausgeben - auch nicht die nativen von
+         SkiaSharp und HarfBuzzSharp. -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!-- Kommt ueber Avalonia.Desktop transitiv herein und wird nur unter Linux
+         benutzt. Ausdruecklich auf die neueste Fassung gehoben, deutlich ueber
+         der fuer CVE-2026-39959 gepatchten 0.92.0. -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.0" />
+  </ItemGroup>
+
+  <!-- Das Testprojekt liegt unter tests\ und hat einen eigenen
+       Einstiegspunkt. Ohne diese Zeile zoege das SDK es hier mit herein -
+       zwei Main-Methoden, Fehler CS0017. -->
+  <ItemGroup>
+    <Compile Remove="tests/**" />
+    <Compile Remove="publish/**" />
+  </ItemGroup>
+
+</Project>

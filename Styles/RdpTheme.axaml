@@ -1,0 +1,307 @@
+<!--
+    Das Aussehen des Editors: die Farbtafel (Catppuccin, hell und dunkel) und
+    die Stile, die das Fenster benutzt.
+
+    Dieselbe Tafel wie in COMPULANInstall - damit beide Programme auf einem
+    Rechner nicht wie Fremde nebeneinander stehen.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+
+                <!-- ===== Dunkles Theme (Catppuccin Mocha) ===== -->
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="BaseBrush" Color="#1E1E2E"/>
+                    <SolidColorBrush x:Key="CrustBrush" Color="#11111B"/>
+                    <SolidColorBrush x:Key="Surface0Brush" Color="#313244"/>
+                    <SolidColorBrush x:Key="Surface1Brush" Color="#45475A"/>
+                    <SolidColorBrush x:Key="CardBrush" Color="#2A2A3E"/>
+                    <SolidColorBrush x:Key="TextBrush" Color="#CDD6F4"/>
+                    <SolidColorBrush x:Key="SubtextBrush" Color="#A6ADC8"/>
+                    <SolidColorBrush x:Key="OverlayBrush" Color="#6C7086"/>
+                    <SolidColorBrush x:Key="BlueBrush" Color="#89B4FA"/>
+                    <SolidColorBrush x:Key="LavenderBrush" Color="#B4BEFE"/>
+                    <SolidColorBrush x:Key="GreenBrush" Color="#A6E3A1"/>
+                    <SolidColorBrush x:Key="RedBrush" Color="#F38BA8"/>
+                    <SolidColorBrush x:Key="YellowBrush" Color="#F9E2AF"/>
+                    <SolidColorBrush x:Key="PeachBrush" Color="#FAB387"/>
+                </ResourceDictionary>
+
+                <!-- ===== Helles Theme (Catppuccin Latte) ===== -->
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="BaseBrush" Color="#EFF1F5"/>
+                    <SolidColorBrush x:Key="CrustBrush" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="Surface0Brush" Color="#CCD0DA"/>
+                    <SolidColorBrush x:Key="Surface1Brush" Color="#BCC0CC"/>
+                    <SolidColorBrush x:Key="CardBrush" Color="#E6E9EF"/>
+                    <SolidColorBrush x:Key="TextBrush" Color="#4C4F69"/>
+                    <SolidColorBrush x:Key="SubtextBrush" Color="#6C6F85"/>
+                    <SolidColorBrush x:Key="OverlayBrush" Color="#9CA0B0"/>
+                    <SolidColorBrush x:Key="BlueBrush" Color="#1E66F5"/>
+                    <SolidColorBrush x:Key="LavenderBrush" Color="#7287FD"/>
+                    <SolidColorBrush x:Key="GreenBrush" Color="#40A02B"/>
+                    <SolidColorBrush x:Key="RedBrush" Color="#D20F39"/>
+                    <SolidColorBrush x:Key="YellowBrush" Color="#DF8E1D"/>
+                    <SolidColorBrush x:Key="PeachBrush" Color="#FE640B"/>
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!-- ============ Ueberschriften ============ -->
+    <Style Selector="TextBlock.section">
+        <Setter Property="Foreground" Value="{DynamicResource BlueBrush}"/>
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="2,0,2,4"/>
+    </Style>
+    <Style Selector="TextBlock.appTitle">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="TextBlock.appSubtitle">
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="FontSize" Value="10.5"/>
+    </Style>
+
+    <!-- ============ Tafel ============ -->
+    <Style Selector="Border.panel">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="7"/>
+        <Setter Property="Padding" Value="8"/>
+    </Style>
+
+    <!-- ============ Eine Einstellung je Zeile ============ -->
+    <Style Selector="Border.entryCard">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="8,5"/>
+        <Setter Property="Margin" Value="0,0,2,3"/>
+    </Style>
+    <Style Selector="Border.entryCard:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource BlueBrush}"/>
+    </Style>
+
+    <!-- Steht der Schluessel in der Datei, tritt die Zeile hervor; steht er
+         nicht darin, bleibt sie blass. Genau das ist bei einer .rdp-Datei die
+         wichtigste Auskunft ueberhaupt: Ein fehlender Schluessel ist nicht
+         "aus", sondern "mstsc entscheidet". -->
+    <Style Selector="Border.entryCard.unset">
+        <Setter Property="Opacity" Value="0.55"/>
+    </Style>
+    <Style Selector="Border.entryCard.changed">
+        <Setter Property="BorderBrush" Value="{DynamicResource PeachBrush}"/>
+    </Style>
+
+    <Style Selector="TextBlock.entryTitle">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="LineHeight" Value="14"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="TextBlock.entryHint">
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="LineHeight" Value="14"/>
+        <Setter Property="Margin" Value="0,1,0,0"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="TextBlock.entryKey">
+        <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,monospace"/>
+        <Setter Property="LineHeight" Value="13"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+
+    <!-- ============ Kennzeichen ============ -->
+    <Style Selector="Border.tagBadge">
+        <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="5,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.tagBadgeText">
+        <Setter Property="Foreground" Value="{DynamicResource LavenderBrush}"/>
+        <Setter Property="FontSize" Value="9.5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- ============ Warnband ============ -->
+    <Style Selector="Border.warning">
+        <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="10,7"/>
+    </Style>
+    <Style Selector="TextBlock.warningText">
+        <Setter Property="Foreground" Value="{DynamicResource YellowBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="Border.hintband">
+        <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="10,7"/>
+    </Style>
+    <Style Selector="TextBlock.hintText">
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <!-- ============ Knoepfe ============ -->
+    <Style Selector="Button.action">
+        <Setter Property="Background" Value="{DynamicResource BlueBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CrustBrush}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,2"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.action:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource LavenderBrush}"/>
+    </Style>
+    <Style Selector="Button.action:disabled">
+        <Setter Property="Opacity" Value="0.4"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+        <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="Padding" Value="9,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+    </Style>
+    <Style Selector="Button.secondary:disabled">
+        <Setter Property="Opacity" Value="0.35"/>
+    </Style>
+    <Style Selector="Button.danger">
+        <Setter Property="Foreground" Value="{DynamicResource RedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}"/>
+    </Style>
+
+    <!-- ============ Eingabefelder ============ -->
+    <Style Selector="TextBox.field">
+        <Setter Property="Background" Value="{DynamicResource CrustBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="7,0"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="MinHeight" Value="25"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBox.field:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource BlueBrush}"/>
+    </Style>
+    <!-- Keine Zahl im Zahlenfeld: Der Wert bleibt stehen, wie er ist - die
+         Datei darf ihn ruhig enthalten -, aber die Kante sagt Bescheid. -->
+    <Style Selector="TextBox.field.invalid">
+        <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}"/>
+    </Style>
+
+    <Style Selector="TextBox.mono">
+        <Setter Property="Background" Value="{DynamicResource CrustBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,monospace"/>
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+    </Style>
+
+    <Style Selector="ComboBox.quick">
+        <Setter Property="Background" Value="{DynamicResource CrustBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="MinHeight" Value="25"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Padding" Value="8,0,4,0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="CheckBox.opt">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- ============ Monitorplan ============ -->
+    <!-- Eine Kachel je Bildschirm, massstaeblich an seiner Stelle. Ein Plan
+         sagt in einem Blick, was eine Liste aus Nummern nicht sagt: welcher
+         Bildschirm links steht. -->
+    <Style Selector="Border.monitorTile">
+        <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Border.monitorTile.picked">
+        <Setter Property="Background" Value="{DynamicResource BlueBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource LavenderBrush}"/>
+    </Style>
+    <Style Selector="Border.monitorTile > StackPanel > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="10"/>
+    </Style>
+    <Style Selector="Border.monitorTile.picked > StackPanel > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource CrustBrush}"/>
+    </Style>
+    <Style Selector="Border.monitorTile > StackPanel > TextBlock.monitorId">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!-- ============ Reiter ============ -->
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="12,4"/>
+        <Setter Property="MinHeight" Value="34"/>
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+    </Style>
+    <Style Selector="TabItem:selected">
+        <Setter Property="Foreground" Value="{DynamicResource BlueBrush}"/>
+    </Style>
+</Styles>

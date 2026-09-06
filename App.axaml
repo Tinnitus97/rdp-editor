@@ -1,0 +1,12 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RdpEditor.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- Farbtafel und Stile stehen in Styles\RdpTheme.axaml. -->
+        <StyleInclude Source="avares://RdpEditor/Styles/RdpTheme.axaml"/>
+    </Application.Styles>
+</Application>
