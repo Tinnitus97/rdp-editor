@@ -35,7 +35,7 @@ public sealed record MonitorEntry(
 
 /// <summary>
 /// Alles, was mit <c>selectedmonitors</c> zu tun hat - ohne Windows-Aufrufe,
-/// damit es sich auf jedem Laeufer pruefen laesst.
+/// damit es sich auf jedem Läufer prüfen lässt.
 /// </summary>
 public static class MonitorSelection
 {
@@ -43,7 +43,7 @@ public static class MonitorSelection
     public const string KeyMultimon = "use multimon";
     public const string KeyScreenMode = "screen mode id";
 
-    /// <summary>Liest "0,2" als [0, 2]. Alles, was keine Zahl ist, faellt weg.</summary>
+    /// <summary>Liest "0,2" als [0, 2]. Alles, was keine Zahl ist, fällt weg.</summary>
     public static List<int> Parse(string? value)
     {
         var ids = new List<int>();
@@ -64,17 +64,17 @@ public static class MonitorSelection
     public static string Format(IEnumerable<int> ids) => string.Join(",", ids);
 
     /// <summary>
-    /// Haengen die gewaehlten Bildschirme zusammen?
+    /// Hängen die gewählten Bildschirme zusammen?
     ///
-    /// mstsc verlangt eine zusammenhaengende Flaeche. Waehlt man den linken
-    /// und den rechten Bildschirm, laesst den mittleren aber aus, faellt die
-    /// Sitzung wortlos auf alle Bildschirme zurueck - die Datei ist gueltig,
-    /// nur tut sie nicht, was darin steht. Deshalb pruefen wir es hier und
+    /// mstsc verlangt eine zusammenhängende Fläche. Wählt man den linken
+    /// und den rechten Bildschirm, lässt den mittleren aber aus, fällt die
+    /// Sitzung wortlos auf alle Bildschirme zurück - die Datei ist gültig,
+    /// nur tut sie nicht, was darin steht. Deshalb prüfen wir es hier und
     /// sagen es vorher.
     ///
     /// Zwei Bildschirme gelten als benachbart, wenn sich ihre Rechtecke
-    /// beruehren oder ueberlappen. Von dort aus wird der Graph durchlaufen;
-    /// bleibt einer uebrig, haengt die Auswahl nicht zusammen.
+    /// berühren oder überlappen. Von dort aus wird der Graph durchlaufen;
+    /// bleibt einer übrig, hängt die Auswahl nicht zusammen.
     /// </summary>
     public static bool IsContiguous(IReadOnlyList<MonitorEntry> selected)
     {
@@ -106,13 +106,13 @@ public static class MonitorSelection
     /// Schreibt die Auswahl in die Datei - samt der beiden Schalter, ohne die
     /// sie wirkungslos bliebe.
     ///
-    /// <c>selectedmonitors</c> greift nur, wenn die Sitzung ueberhaupt mehrere
-    /// Bildschirme benutzt (<c>use multimon:i:1</c>) und im Vollbild laeuft
+    /// <c>selectedmonitors</c> greift nur, wenn die Sitzung überhaupt mehrere
+    /// Bildschirme benutzt (<c>use multimon:i:1</c>) und im Vollbild läuft
     /// (<c>screen mode id:i:2</c>). Das ist die Falle, in die jeder tappt, der
-    /// die Zeile von Hand einfuegt: Sie steht da, sie ist richtig geschrieben -
+    /// die Zeile von Hand einfügt: Sie steht da, sie ist richtig geschrieben -
     /// und passiert tut nichts.
     ///
-    /// Sind alle oder gar keine Bildschirme gewaehlt, verschwindet die Zeile
+    /// Sind alle oder gar keine Bildschirme gewählt, verschwindet die Zeile
     /// wieder: "alle" ist genau das, was ohne sie geschieht.
     /// </summary>
     public static void Apply(RdpDocument doc, IReadOnlyList<int> ids, int monitorCount)
@@ -132,15 +132,15 @@ public static class MonitorSelection
 
     /// <summary>
     /// Der Satz, der unter dem Monitorplan steht: was die Datei nach dieser
-    /// Auswahl tatsaechlich tut.
+    /// Auswahl tatsächlich tut.
     /// </summary>
     public static string Describe(IReadOnlyList<int> ids, int monitorCount)
     {
         if (ids.Count == 0)
-            return "Ein Bildschirm. \"use multimon\" steht auf 0, \"selectedmonitors\" entfaellt.";
+            return "Ein Bildschirm. \"use multimon\" steht auf 0, \"selectedmonitors\" entfällt.";
 
         if (monitorCount > 0 && ids.Count >= monitorCount)
-            return "Alle Bildschirme. \"use multimon\" steht auf 1, \"selectedmonitors\" entfaellt - "
+            return "Alle Bildschirme. \"use multimon\" steht auf 1, \"selectedmonitors\" entfällt - "
                  + "ohne die Zeile nimmt die Sitzung ohnehin alle.";
 
         var list = Format(ids);

@@ -10,7 +10,7 @@ namespace RdpEditor.Views;
 
 public partial class MainWindow : Window
 {
-    /// <summary>Steht auf true, sobald das Verwerfen bestaetigt wurde.</summary>
+    /// <summary>Steht auf true, sobald das Verwerfen bestätigt wurde.</summary>
     private bool _closeConfirmed;
 
     public MainWindow()
@@ -33,8 +33,8 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Nicht gespeicherte Aenderungen nicht wortlos wegwerfen. Die Abfrage
-    /// laeuft asynchron, deshalb wird das Schliessen zunaechst abgebrochen und
+    /// Nicht gespeicherte Änderungen nicht wortlos wegwerfen. Die Abfrage
+    /// läuft asynchron, deshalb wird das Schließen zunächst abgebrochen und
     /// nach dem Ja wiederholt.
     /// </summary>
     private void OnClosing(object? sender, WindowClosingEventArgs e)

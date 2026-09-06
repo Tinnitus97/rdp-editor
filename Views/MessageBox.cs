@@ -7,8 +7,8 @@ using Avalonia.Media;
 namespace RdpEditor.Views;
 
 /// <summary>
-/// Kleiner Ersatz fuer eine Meldungsbox in der Optik der Anwendung.
-/// Wird immer vom Oberflaechenfaden aus aufgerufen.
+/// Kleiner Ersatz für eine Meldungsbox in der Optik der Anwendung.
+/// Wird immer vom Oberflächenfaden aus aufgerufen.
 /// </summary>
 public static class MessageBox
 {

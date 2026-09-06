@@ -52,7 +52,7 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <!-- ============ Ueberschriften ============ -->
+    <!-- ============ Überschriften ============ -->
     <Style Selector="TextBlock.section">
         <Setter Property="Foreground" Value="{DynamicResource BlueBrush}"/>
         <Setter Property="FontSize" Value="11.5"/>
@@ -91,9 +91,9 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BlueBrush}"/>
     </Style>
 
-    <!-- Steht der Schluessel in der Datei, tritt die Zeile hervor; steht er
+    <!-- Steht der Schlüssel in der Datei, tritt die Zeile hervor; steht er
          nicht darin, bleibt sie blass. Genau das ist bei einer .rdp-Datei die
-         wichtigste Auskunft ueberhaupt: Ein fehlender Schluessel ist nicht
+         wichtigste Auskunft überhaupt: Ein fehlender Schlüssel ist nicht
          "aus", sondern "mstsc entscheidet". -->
     <Style Selector="Border.entryCard.unset">
         <Setter Property="Opacity" Value="0.55"/>
@@ -122,6 +122,41 @@
         <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,monospace"/>
         <Setter Property="LineHeight" Value="13"/>
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+
+    <!-- ============ Gruppe innerhalb eines Reiters ============ -->
+    <!-- Ein Kasten je Gruppe, wie im Dialog von mstsc. Ohne diese Kästen
+         standen neunzig Zeilen als eine Kolonne untereinander, und welche
+         drei davon zusammengehören, sah man erst beim Lesen. -->
+    <Style Selector="Border.panel.group">
+        <Setter Property="Background" Value="{DynamicResource BaseBrush}"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Margin" Value="0,0,0,9"/>
+    </Style>
+    <Style Selector="TextBlock.groupTitle">
+        <Setter Property="Foreground" Value="{DynamicResource BlueBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="TextBlock.groupHint">
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="LineHeight" Value="14"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,0,0,2"/>
+    </Style>
+
+    <!-- Ein Knopf, der einen ganzen Satz Werte setzt. Er trägt Farbe, damit
+         er sich von den Zeilen darunter abhebt - er tut mehr als sie. -->
+    <Style Selector="Button.preset">
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource LavenderBrush}"/>
+        <Setter Property="Margin" Value="0,0,6,4"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+    <Style Selector="Button.preset:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource LavenderBrush}"/>
+        <Setter Property="TextBlock.Foreground" Value="{DynamicResource CrustBrush}"/>
     </Style>
 
     <!-- ============ Kennzeichen ============ -->
@@ -163,7 +198,7 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
-    <!-- ============ Knoepfe ============ -->
+    <!-- ============ Knöpfe ============ -->
     <Style Selector="Button.action">
         <Setter Property="Background" Value="{DynamicResource BlueBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource CrustBrush}"/>
@@ -267,7 +302,7 @@
     </Style>
 
     <!-- ============ Monitorplan ============ -->
-    <!-- Eine Kachel je Bildschirm, massstaeblich an seiner Stelle. Ein Plan
+    <!-- Eine Kachel je Bildschirm, maßstäblich an seiner Stelle. Ein Plan
          sagt in einem Blick, was eine Liste aus Nummern nicht sagt: welcher
          Bildschirm links steht. -->
     <Style Selector="Border.monitorTile">

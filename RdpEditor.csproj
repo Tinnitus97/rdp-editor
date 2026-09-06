@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    RDP-Editor: aendert die Einstellungen einer .rdp-Datei, auch die, fuer die
+    RDP-Editor: ändert die Einstellungen einer .rdp-Datei, auch die, für die
     mstsc keine Schaltflaeche hat.
 
     Der Anlass ist "selectedmonitors": Die Verbindungsanzeige von mstsc kennt
@@ -48,9 +48,9 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <!-- Kommt ueber Avalonia.Desktop transitiv herein und wird nur unter Linux
-         benutzt. Ausdruecklich auf die neueste Fassung gehoben, deutlich ueber
-         der fuer CVE-2026-39959 gepatchten 0.92.0. -->
+    <!-- Kommt über Avalonia.Desktop transitiv herein und wird nur unter Linux
+         benutzt. Ausdruecklich auf die neueste Fassung gehoben, deutlich über
+         der für CVE-2026-39959 gepatchten 0.92.0. -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.0" />
   </ItemGroup>
 

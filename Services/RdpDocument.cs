@@ -9,17 +9,17 @@ namespace RdpEditor.Services;
 /// <summary>
 /// Eine Zeile einer .rdp-Datei.
 ///
-/// Entweder eine Einstellung (<c>schluessel:typ:wert</c>) oder eine Zeile, die
+/// Entweder eine Einstellung (<c>schlüssel:typ:wert</c>) oder eine Zeile, die
 /// diesem Muster nicht folgt - eine leere Zeile etwa. Solche Zeilen behalten
-/// wir im Wortlaut und geben sie beim Speichern unveraendert zurueck: Was der
+/// wir im Wortlaut und geben sie beim Speichern unverändert zurück: Was der
 /// Editor nicht versteht, darf er auch nicht wegwerfen.
 /// </summary>
 public sealed class RdpLine
 {
-    /// <summary>Der Schluessel in der Schreibweise der Datei, oder null fuer eine unverstandene Zeile.</summary>
+    /// <summary>Der Schlüssel in der Schreibweise der Datei, oder null für eine unverstandene Zeile.</summary>
     public string? Key { get; init; }
 
-    /// <summary>'i' fuer Zahl, 's' fuer Text, 'b' fuer Binaerwert (Hex).</summary>
+    /// <summary>'i' für Zahl, 's' für Text, 'b' für Binärwert (Hex).</summary>
     public char Type { get; set; }
 
     public string Value { get; set; } = "";
@@ -36,9 +36,9 @@ public sealed class RdpLine
 /// Der Inhalt einer .rdp-Datei: eine Liste von Zeilen in der Reihenfolge, in
 /// der sie in der Datei stehen.
 ///
-/// Bewusst kein Woerterbuch: mstsc schreibt seine Schluessel in einer festen
-/// Reihenfolge, und eine Datei, die nach dem Speichern voellig anders sortiert
-/// ist, laesst sich mit der vorigen Fassung nicht mehr vergleichen. Geaenderte
+/// Bewusst kein Wörterbuch: mstsc schreibt seine Schlüssel in einer festen
+/// Reihenfolge, und eine Datei, die nach dem Speichern völlig anders sortiert
+/// ist, lässt sich mit der vorigen Fassung nicht mehr vergleichen. Geänderte
 /// Werte bleiben deshalb an ihrer Stelle stehen, neue kommen ans Ende.
 /// </summary>
 public sealed class RdpDocument
@@ -78,7 +78,7 @@ public sealed class RdpDocument
     }
 
     /// <summary>
-    /// Zerlegt eine Zeile in Schluessel, Typ und Wert.
+    /// Zerlegt eine Zeile in Schlüssel, Typ und Wert.
     ///
     /// Getrennt wird nur an den ersten beiden Doppelpunkten: Der Wert selbst
     /// darf welche enthalten, etwa bei <c>full address:s:server:3390</c>.
@@ -106,8 +106,8 @@ public sealed class RdpDocument
     /// Erkennt die Kodierung an der Bytefolge.
     ///
     /// mstsc schreibt UTF-16 LE mit Byte-Order-Mark. Von Hand angelegte oder
-    /// aus einem Skript erzeugte Dateien sind haeufig UTF-8 oder ANSI - und
-    /// wer eine solche Datei mit einem UTF-16-Leser oeffnet, bekommt
+    /// aus einem Skript erzeugte Dateien sind häufig UTF-8 oder ANSI - und
+    /// wer eine solche Datei mit einem UTF-16-Leser öffnet, bekommt
     /// chinesische Schriftzeichen statt seiner Serveradresse.
     /// </summary>
     private static string Decode(byte[] bytes, out string encodingName)
@@ -129,7 +129,7 @@ public sealed class RdpDocument
         }
 
         // Ohne Vorzeichen: In UTF-16 ist bei lateinischer Schrift jedes zweite
-        // Byte null. In UTF-8 kommt eine Null ueberhaupt nicht vor.
+        // Byte null. In UTF-8 kommt eine Null überhaupt nicht vor.
         var nullBytes = bytes.Count(b => b == 0);
         if (bytes.Length >= 4 && nullBytes > bytes.Length / 4)
         {
@@ -163,9 +163,9 @@ public sealed class RdpDocument
     /// <summary>
     /// Schreibt die Datei als UTF-16 LE mit Byte-Order-Mark.
     ///
-    /// Immer in dieser Kodierung, gleichgueltig wie die gelesene Datei
+    /// Immer in dieser Kodierung, gleichgültig wie die gelesene Datei
     /// aussah: Genau so legt mstsc seine Dateien ab, und es ist die einzige,
-    /// bei der auch Umlaute in Benutzernamen und RemoteApp-Titeln zuverlaessig
+    /// bei der auch Umlaute in Benutzernamen und RemoteApp-Titeln zuverlässig
     /// ankommen.
     /// </summary>
     public void Save(string path)
@@ -186,7 +186,7 @@ public sealed class RdpDocument
         => int.TryParse(Get(key), out var value) ? value : fallback;
 
     /// <summary>
-    /// Setzt einen Wert. Steht der Schluessel schon in der Datei, aendert sich
+    /// Setzt einen Wert. Steht der Schlüssel schon in der Datei, ändert sich
     /// nur sein Wert an Ort und Stelle; sonst kommt er ans Ende.
     /// </summary>
     public void Set(string key, char type, string value)
@@ -212,11 +212,11 @@ public sealed class RdpDocument
         return true;
     }
 
-    /// <summary>Alle Schluessel in der Reihenfolge der Datei.</summary>
+    /// <summary>Alle Schlüssel in der Reihenfolge der Datei.</summary>
     public IEnumerable<string> Keys => _lines.Where(l => l.IsSetting).Select(l => l.Key!);
 
     /// <summary>
-    /// Die Voreinstellung fuer eine neue Datei: der Satz, den mstsc selbst
+    /// Die Voreinstellung für eine neue Datei: der Satz, den mstsc selbst
     /// schreibt, wenn man eine Verbindung ohne weitere Angaben speichert.
     /// </summary>
     public static RdpDocument CreateDefault() => Parse(string.Join("\r\n", new[]

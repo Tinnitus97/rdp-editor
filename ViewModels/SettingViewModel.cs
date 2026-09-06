@@ -11,9 +11,9 @@ namespace RdpEditor.ViewModels;
 /// Eine Zeile im Fenster: eine Einstellung der Datei.
 ///
 /// Der Haken rechts ist der eigentliche Unterschied zu einem Einstellungs-
-/// dialog: Er sagt, ob der Schluessel ueberhaupt in der Datei steht. Das ist
+/// dialog: Er sagt, ob der Schlüssel überhaupt in der Datei steht. Das ist
 /// nicht dasselbe wie "aus" - fehlt er, entscheidet mstsc, und je nach
-/// Windows-Fassung faellt diese Entscheidung anders aus. Wer eine Einstellung
+/// Windows-Fassung fällt diese Entscheidung anders aus. Wer eine Einstellung
 /// festnageln will, muss sie hineinschreiben, auch wenn ihr Wert der
 /// Voreinstellung entspricht.
 /// </summary>
@@ -22,7 +22,7 @@ public sealed partial class SettingViewModel : ObservableObject
     private readonly RdpDocument _doc;
     private readonly Action _changed;
 
-    /// <summary>Waehrend des Einlesens aus der Datei nicht zurueckschreiben.</summary>
+    /// <summary>Während des Einlesens aus der Datei nicht zurückschreiben.</summary>
     private bool _loading;
 
     public SettingViewModel(RdpSetting definition, RdpDocument doc, Action changed)
@@ -44,7 +44,7 @@ public sealed partial class SettingViewModel : ObservableObject
     public string Label => Definition.Label;
     public string Hint => Definition.Hint;
 
-    /// <summary>Der Schluessel so, wie er in der Datei steht - klein und einfarbig unter der Beschriftung.</summary>
+    /// <summary>Der Schlüssel so, wie er in der Datei steht - klein und einfarbig unter der Beschriftung.</summary>
     public string KeyLine => $"{Definition.Key}:{Definition.Type}:";
 
     public bool IsToggle => Definition.Kind == RdpEditorKind.Toggle;
@@ -64,7 +64,7 @@ public sealed partial class SettingViewModel : ObservableObject
 
     // ======================================================== Lesen und Schreiben
 
-    /// <summary>Holt den Wert erneut aus der Datei - nach dem Laden und nach jeder Aenderung anderswo.</summary>
+    /// <summary>Holt den Wert erneut aus der Datei - nach dem Laden und nach jeder Änderung anderswo.</summary>
     public void Refresh()
     {
         _loading = true;
@@ -85,7 +85,7 @@ public sealed partial class SettingViewModel : ObservableObject
 
                 // Ein Wert, den der Katalog nicht vorsieht - etwa eine Farbtiefe
                 // von 24 in einer alten Datei. Er kommt in die Liste, statt beim
-                // naechsten Speichern still auf den ersten Eintrag zu fallen.
+                // nächsten Speichern still auf den ersten Eintrag zu fallen.
                 if (match is null && raw.Trim().Length > 0)
                 {
                     match = new RdpChoice(raw.Trim(), $"{raw.Trim()} (unbekannter Wert)");
@@ -103,7 +103,7 @@ public sealed partial class SettingViewModel : ObservableObject
         OnPropertyChanged(nameof(StateText));
     }
 
-    /// <summary>Steht der Schluessel in der Datei, oder ueberlaesst die Datei ihn mstsc?</summary>
+    /// <summary>Steht der Schlüssel in der Datei, oder überlässt die Datei ihn mstsc?</summary>
     public string StateText => IsPresent ? "steht in der Datei" : "nicht gesetzt";
 
     partial void OnIsPresentChanged(bool value)
@@ -140,7 +140,7 @@ public sealed partial class SettingViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Schreibt den Wert in die Datei. Wer an einer Zeile etwas aendert, will
+    /// Schreibt den Wert in die Datei. Wer an einer Zeile etwas ändert, will
     /// sie in der Datei haben - der Haken setzt sich deshalb von selbst.
     /// </summary>
     private void Write()
@@ -170,7 +170,7 @@ public sealed partial class SettingViewModel : ObservableObject
 
     // ======================================================== Suche
 
-    /// <summary>Passt die Zeile zum Suchbegriff? Gesucht wird im Schluessel, in der Beschriftung und im Hinweis.</summary>
+    /// <summary>Passt die Zeile zum Suchbegriff? Gesucht wird im Schlüssel, in der Beschriftung und im Hinweis.</summary>
     public bool Matches(string needle)
         => Key.Contains(needle, StringComparison.OrdinalIgnoreCase)
         || Label.Contains(needle, StringComparison.OrdinalIgnoreCase)

@@ -37,16 +37,16 @@ geschrieben, und passiert tut nichts. Der Reiter setzt beides mit und schreibt
 unter den Plan, was aus der Auswahl in der Datei wird.
 
 **Zusammenhängen wird geprüft.** mstsc verlangt eine zusammenhängende Fläche.
-Wer den linken und den rechten Bildschirm wählt, den mittleren aber ausläßt,
+Wer den linken und den rechten Bildschirm wählt, den mittleren aber auslässt,
 bekommt eine gültige Datei, die trotzdem alle Bildschirme nimmt. Der Editor
 sagt es vorher.
 
 Der erste gewählte Bildschirm wird der **Hauptbildschirm der Sitzung** – dort
-erscheinen Anmeldung und Taskleiste. Die Reihenfolge läßt sich mit „Als erster"
+erscheinen Anmeldung und Taskleiste. Die Reihenfolge lässt sich mit „Als erster"
 ändern.
 
 Und wer eine Datei für einen *anderen* Arbeitsplatz vorbereitet, tippt die
-Nummern unten von Hand ein; geprüft wird dann nur, was sich prüfen läßt.
+Nummern unten von Hand ein; geprüft wird dann nur, was sich prüfen lässt.
 
 ---
 
@@ -64,7 +64,28 @@ Nummern unten von Hand ein; geprüft wird dann nur, was sich prüfen läßt.
 | RemoteApp | Programm, Befehlszeile, Symbol, alternative Shell |
 | Erweitert | Signatur, gespeichertes Kennwort, alte Schreibweisen |
 | Unbekannt | jeder Schlüssel der Datei, den der Katalog nicht kennt |
+| Transport | TCP oder UDP - der einzige Reiter, der nicht die Datei ändert |
 | Rohansicht | die Datei als Text, so wie sie gespeichert wird |
+
+**Zusammengehörendes steht beieinander.** Jeder Reiter ist in Kästen mit
+Überschrift geteilt – „Übertragungsrate", „Folgendes zulassen", „Ton",
+„Laufwerke und USB" – statt neunzig Zeilen als eine Kolonne. Die Aufteilung
+steht an einer Stelle (`Services/RdpGroups.cs`); ein Test prüft, dass jeder
+Schlüssel des Katalogs in genau einem Kasten liegt und kein Kasten einen
+Schlüssel nennt, den es nicht gibt.
+
+**Vorgabeknöpfe über der Gruppe.** „LAN – alles an", „Breitband – Mittelweg",
+„Schmalband – alles aus", „Automatisch messen" setzen die Übertragungsrate und
+die sechs Darstellungsschalter in einem Zug. Genau das tut mstsc auch, wenn man
+die Übertragungsrate umstellt – nur ungefragt und ohne zu sagen, welche Zeilen
+es dabei ändert. Hier steht am Mauszeiger jede Zeile, die der Knopf schreibt.
+Für die Geräte gibt es dieselben Knöpfe: „Nichts weiterreichen", „Nur
+Zwischenablage", „Alle Laufwerke".
+
+**Achtung, umgekehrte Zählweise.** Im mstsc-Dialog heißt es „Desktophintergrund
+[x] zulassen"; in der Datei steht dafür `disable wallpaper:i:0`. Die Gruppe
+„Folgendes zulassen" sagt das dazu, und jede Zeile ist so beschriftet, wie die
+Datei zählt – ein Haken bedeutet dort *abgeschaltet*.
 
 **Neunzig Schlüssel mit Klartext daneben.** In der Datei steht
 `authentication level:i:2` – was diese 2 bedeutet, steht nirgends. Ohne den
@@ -74,12 +95,12 @@ Zeilennummern.
 **Der Haken rechts sagt, ob der Schlüssel überhaupt in der Datei steht.** Das
 ist nicht dasselbe wie „aus": Fehlt er, entscheidet mstsc, und je nach
 Windows-Fassung fällt diese Entscheidung anders aus. Wer eine Einstellung
-festnageln will, muß sie hineinschreiben – auch wenn ihr Wert der
+festnageln will, muss sie hineinschreiben – auch wenn ihr Wert der
 Voreinstellung entspricht. Zeilen, die nicht in der Datei stehen, sind deshalb
 blaß dargestellt.
 
 **Nichts geht verloren.** Was der Katalog nicht kennt, steht unter „Unbekannt"
-und läßt sich dort ebenso ändern. Zeilen, die dem Muster `schlüssel:typ:wert`
+und lässt sich dort ebenso ändern. Zeilen, die dem Muster `schlüssel:typ:wert`
 gar nicht folgen, bleiben im Wortlaut erhalten. Der Katalog entscheidet über
 die Bequemlichkeit, nicht über den Umfang.
 
@@ -112,7 +133,7 @@ Benutzernamen und RemoteApp-Titeln zuverlässig ankommen.
 | Mit mstsc öffnen | speichert und startet die Verbindung – die Probe aufs Exempel |
 | Hell/Dunkel | der Knopf ganz rechts |
 
-Die EXE nimmt einen Dateinamen als Parameter entgegen und läßt sich damit als
+Die EXE nimmt einen Dateinamen als Parameter entgegen und lässt sich damit als
 „Öffnen mit" für `.rdp`-Dateien eintragen.
 
 Sie fordert **keine** Administratorrechte an: Der Editor schreibt eine
@@ -120,11 +141,34 @@ Textdatei, sonst nichts.
 
 ---
 
+## TCP oder UDP
+
+**In der `.rdp`-Datei geht das nicht** – es gibt keinen Schlüssel dafür. Der
+Transport ist keine Eigenschaft der Verbindung, sondern eine Abmachung zwischen
+Client und Server: Der Client bietet UDP an, solange es ihm nicht verboten ist,
+der Server nimmt es an, solange seine Richtlinie es zulässt. Kommt UDP nicht
+durch, fällt mstsc von selbst auf TCP zurück.
+
+Verboten wird es an zwei Stellen, beide außerhalb der Datei:
+
+| Seite | wo |
+|---|---|
+| Client | Richtlinienwert `fClientDisableUDP` unter `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\Client`, Gruppenrichtlinie „UDP auf Client deaktivieren" |
+| Server | Gruppenrichtlinie „RDP-Transportprotokolle auswählen" auf dem Sitzungshost |
+
+Der Reiter **Transport** zeigt, was an den drei fraglichen Stellen dieses
+Rechners steht, und setzt die Client-Seite auf Wunsch um – mit sichtbarer
+UAC-Abfrage, denn dafür braucht es Administratorrechte. Er sagt auch dazu, dass
+das den **ganzen Rechner** betrifft und nicht die geöffnete Datei. Wer es
+verteilen will, lässt sich dieselbe Änderung als `.reg`-Datei ausgeben.
+
+---
+
 ## Was der Editor nicht kann
 
 **Ein Kennwort speichern.** `password 51:b:…` ist mit DPAPI verschlüsselt und
 nur auf dem Rechner und im Konto lesbar, wo es gespeichert wurde. Der Editor
-zeigt an, ob eines vorhanden ist, und entfernt es auf Wunsch – setzen läßt es
+zeigt an, ob eines vorhanden ist, und entfernt es auf Wunsch – setzen lässt es
 sich nur in mstsc selbst.
 
 **Eine Signatur erneuern.** Ist die Datei signiert, macht jede Änderung die
@@ -153,5 +197,5 @@ fertige `RdpEditor.exe` hängt dort an jedem Lauf.
 
 Die Prüfungen kommen ohne Testrahmen und ohne Windows aus – deshalb steht die
 Auswahllogik (`MonitorSelection`) getrennt von der Bildschirmermittlung
-(`MonitorScan`): Was entschieden wird, ist prüfbar, ohne daß ein Bildschirm
-angeschlossen sein muß.
+(`MonitorScan`): Was entschieden wird, ist prüfbar, ohne dass ein Bildschirm
+angeschlossen sein muss.

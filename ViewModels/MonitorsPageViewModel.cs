@@ -10,7 +10,7 @@ using RdpEditor.Services;
 namespace RdpEditor.ViewModels;
 
 /// <summary>
-/// Eine Kachel im Monitorplan - ein Bildschirm, massstaeblich an seiner Stelle.
+/// Eine Kachel im Monitorplan - ein Bildschirm, maßstäblich an seiner Stelle.
 /// </summary>
 public sealed partial class MonitorTileViewModel : ObservableObject
 {
@@ -60,7 +60,7 @@ public sealed partial class MonitorTileViewModel : ObservableObject
 ///
 /// mstsc kennt nur die Frage "alle Bildschirme benutzen: ja oder nein". Welche
 /// Bildschirme, steht in <c>selectedmonitors</c>, und diese Zeile schreibt
-/// mstsc niemals selbst. Wer sie von Hand einfuegt, uebersieht meist, dass sie
+/// mstsc niemals selbst. Wer sie von Hand einfügt, übersieht meist, dass sie
 /// ohne <c>use multimon:i:1</c> und <c>screen mode id:i:2</c> wirkungslos ist -
 /// beides setzt dieser Reiter mit.
 /// </summary>
@@ -69,12 +69,12 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
     private readonly RdpDocument _doc;
     private readonly Action _changed;
 
-    /// <summary>Die gewaehlten Nummern in der Reihenfolge der Auswahl.</summary>
+    /// <summary>Die gewählten Nummern in der Reihenfolge der Auswahl.</summary>
     private readonly List<int> _order = new();
 
     private bool _loading;
 
-    /// <summary>Groesse des Monitorplans im Fenster.</summary>
+    /// <summary>Größe des Monitorplans im Fenster.</summary>
     public const double MapWidth = 640;
     public const double MapHeight = 250;
 
@@ -104,7 +104,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
 
         if (!fromWindows)
         {
-            // Rueckfall ueber Avalonia - unter Windows nur, wenn die Aufrufe
+            // Rückfall über Avalonia - unter Windows nur, wenn die Aufrufe
             // nichts geliefert haben, sonst immer.
             var window = (Avalonia.Application.Current?.ApplicationLifetime
                 as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow;
@@ -120,11 +120,11 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
         ScanText = Monitors.Count switch
         {
             0 => "Es liess sich kein Bildschirm ermitteln. Die Nummern lassen sich unten von Hand "
-               + "eintragen - \"mstsc /l\" zeigt, welche Nummer zu welchem Bildschirm gehoert.",
+               + "eintragen - \"mstsc /l\" zeigt, welche Nummer zu welchem Bildschirm gehört.",
             _ when fromWindows =>
                  $"{Monitors.Count} Bildschirme, in der Reihenfolge, aus der auch mstsc seine "
                + "Nummern nimmt. Zur Probe zeigt \"mstsc /l\" dieselbe Liste.",
-            _ => $"{Monitors.Count} Bildschirme, ueber Avalonia ermittelt. Diese Reihenfolge muss "
+            _ => $"{Monitors.Count} Bildschirme, über Avalonia ermittelt. Diese Reihenfolge muss "
                + "nicht die von mstsc sein - bitte mit \"mstsc /l\" vergleichen.",
         };
 
@@ -134,7 +134,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
 
     /// <summary>
     /// Rechnet die Bildschirmkoordinaten in den Plan um: ein Rechteck je
-    /// Bildschirm, massstaeblich und an seiner Stelle zueinander.
+    /// Bildschirm, maßstäblich und an seiner Stelle zueinander.
     /// </summary>
     private void Layout()
     {
@@ -161,7 +161,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
             tile.MapY = offsetY + (tile.Monitor.Y - top) * scale;
 
             // Zwei Bildpunkte Luft, damit benachbarte Kacheln nicht zu einer
-            // Flaeche verschmelzen.
+            // Fläche verschmelzen.
             tile.MapWidth = Math.Max(30, tile.Monitor.Width * scale - 2);
             tile.MapHeight = Math.Max(24, tile.Monitor.Height * scale - 2);
         }
@@ -237,7 +237,7 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
         Apply();
     }
 
-    /// <summary>Uebernimmt die von Hand eingetippten Nummern.</summary>
+    /// <summary>Übernimmt die von Hand eingetippten Nummern.</summary>
     [RelayCommand]
     private void ApplyManual()
     {
@@ -302,14 +302,14 @@ public sealed partial class MonitorsPageViewModel : PageViewModel
         {
             WarningText = $"Bildschirm {MonitorSelection.Format(unknown)} ist an diesem Rechner "
                         + "nicht angeschlossen. Auf dem Rechner, der die Datei benutzt, mag es ihn "
-                        + "geben - hier laesst sich die Auswahl nicht pruefen.";
+                        + "geben - hier lässt sich die Auswahl nicht prüfen.";
             HasWarning = true;
         }
         else if (chosen.Count > 1 && !MonitorSelection.IsContiguous(chosen))
         {
-            WarningText = "Die gewaehlten Bildschirme haengen nicht zusammen. mstsc verlangt eine "
-                        + "zusammenhaengende Flaeche und faellt sonst wortlos auf alle Bildschirme "
-                        + "zurueck - die Datei bliebe gueltig, nur taete sie nicht, was darin steht.";
+            WarningText = "Die gewählten Bildschirme hängen nicht zusammen. mstsc verlangt eine "
+                        + "zusammenhängende Fläche und fällt sonst wortlos auf alle Bildschirme "
+                        + "zurück - die Datei bliebe gültig, nur täte sie nicht, was darin steht.";
             HasWarning = true;
         }
         else

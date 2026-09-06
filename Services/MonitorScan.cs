@@ -8,15 +8,15 @@ namespace RdpEditor.Services;
 /// <summary>
 /// Fragt Windows nach den angeschlossenen Bildschirmen.
 ///
-/// Warum nicht ueber Avalonia: Die Nummer, die in <c>selectedmonitors</c>
-/// gehoert, ist die Stelle in der Reihenfolge von <c>EnumDisplayMonitors</c> -
+/// Warum nicht über Avalonia: Die Nummer, die in <c>selectedmonitors</c>
+/// gehört, ist die Stelle in der Reihenfolge von <c>EnumDisplayMonitors</c> -
 /// derselben Reihenfolge, aus der auch mstsc seine Nummern nimmt. Eine
-/// Bildschirmliste aus einem anderen Rahmenwerk kann dieselben Geraete in
-/// anderer Reihenfolge liefern, und dann waehlt man am Ende den falschen.
+/// Bildschirmliste aus einem anderen Rahmenwerk kann dieselben Geräte in
+/// anderer Reihenfolge liefern, und dann wählt man am Ende den falschen.
 ///
-/// Die Avalonia-Liste steht trotzdem als Rueckfall bereit - fuer den Fall,
+/// Die Avalonia-Liste steht trotzdem als Rückfall bereit - für den Fall,
 /// dass die Windows-Aufrufe nichts liefern, und damit sich das Fenster auch
-/// auf einem Linux-Rechner ansehen laesst.
+/// auf einem Linux-Rechner ansehen lässt.
 /// </summary>
 public static class MonitorScan
 {
@@ -30,16 +30,16 @@ public static class MonitorScan
         }
         catch
         {
-            // Kein Grund abzustuerzen: Ohne Liste bleibt der Monitorplan leer,
+            // Kein Grund abzustürzen: Ohne Liste bleibt der Monitorplan leer,
             // die Nummern lassen sich weiterhin von Hand eintragen.
             return Array.Empty<MonitorEntry>();
         }
     }
 
     /// <summary>
-    /// Rueckfall ueber Avalonia. Die Reihenfolge muss nicht die von mstsc
+    /// Rückfall über Avalonia. Die Reihenfolge muss nicht die von mstsc
     /// sein - deshalb sagt der Monitorplan in diesem Fall dazu, dass die
-    /// Nummern gegen "mstsc /l" zu pruefen sind.
+    /// Nummern gegen "mstsc /l" zu prüfen sind.
     /// </summary>
     public static IReadOnlyList<MonitorEntry> FromAvalonia(Avalonia.Controls.Screens? screens)
     {
@@ -73,7 +73,7 @@ public static class MonitorScan
     {
         var handles = new List<IntPtr>();
 
-        // Der Delegat muss den Aufruf ueberleben - als lokale Variable tut er
+        // Der Delegat muss den Aufruf überleben - als lokale Variable tut er
         // das, als Ausdruck im Aufruf nicht zwingend.
         MonitorEnumProc callback = (IntPtr monitor, IntPtr hdc, ref RECT rect, IntPtr data) =>
         {
@@ -127,7 +127,7 @@ public static class MonitorScan
     }
 
     /// <summary>
-    /// Die tatsaechliche Punktdichte des Bildschirms. Gibt es die Funktion
+    /// Die tatsächliche Punktdichte des Bildschirms. Gibt es die Funktion
     /// nicht (Windows vor 8.1), bleibt es bei 96 - also 100 %.
     /// </summary>
     [SupportedOSPlatform("windows")]

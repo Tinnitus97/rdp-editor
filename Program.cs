@@ -10,7 +10,7 @@ internal static class Program
 {
     /// <summary>
     /// Die Datei, die beim Start mitgegeben wurde - erster Parameter der
-    /// Befehlszeile. Damit laesst sich der Editor als "Oeffnen mit" fuer
+    /// Befehlszeile. Damit lässt sich der Editor als "Öffnen mit" für
     /// .rdp-Dateien eintragen.
     /// </summary>
     public static string? StartupFile { get; private set; }
@@ -26,7 +26,7 @@ internal static class Program
             break;
         }
 
-        // Globale Absturz-Faenger: schreiben jede unbehandelte Ausnahme in eine
+        // Globale Absturz-Fänger: schreiben jede unbehandelte Ausnahme in eine
         // Logdatei, statt die Anwendung wortlos zu beenden.
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             WriteCrashLog("AppDomain.UnhandledException", e.ExceptionObject as Exception);
@@ -48,7 +48,7 @@ internal static class Program
         }
     }
 
-    // Wird auch vom Oberflaechen-Entwurf benutzt - nicht entfernen.
+    // Wird auch vom Oberflächen-Entwurf benutzt - nicht entfernen.
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()

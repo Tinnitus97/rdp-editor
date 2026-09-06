@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Prueft die Dienste ohne Oberflaeche.
+    Prüft die Dienste ohne Oberfläche.
 
-    Kein Testrahmen und kein net10.0-windows: Die geprueften Dateien kommen
-    ohne Avalonia und ohne Windows-eigene Aufrufe aus, deshalb laeuft die
-    Pruefung auf einem Linux-Laeufer in Sekunden.
+    Kein Testrahmen und kein net10.0-windows: Die geprüften Dateien kommen
+    ohne Avalonia und ohne Windows-eigene Aufrufe aus, deshalb läuft die
+    Prüfung auf einem Linux-Läufer in Sekunden.
 
-    Genau dafuer steht die Auswahllogik (MonitorSelection) getrennt von der
+    Genau dafür steht die Auswahllogik (MonitorSelection) getrennt von der
     Bildschirmermittlung (MonitorScan): Was entschieden wird, ist pruefbar,
     ohne dass ein Bildschirm angeschlossen sein muss.
   -->
@@ -27,6 +27,8 @@
     <Compile Include="../../Services/RdpDocument.cs" />
     <Compile Include="../../Services/RdpCatalog.cs" />
     <Compile Include="../../Services/MonitorSelection.cs" />
+    <Compile Include="../../Services/RdpGroups.cs" />
+    <Compile Include="../../Services/UdpTransport.cs" />
   </ItemGroup>
 
 </Project>

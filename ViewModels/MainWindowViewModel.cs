@@ -20,10 +20,10 @@ namespace RdpEditor.ViewModels;
 /// Reiter.
 ///
 /// Der Aufbau folgt der Datei, nicht dem Verbindungsdialog von mstsc: Jeder
-/// Schluessel, der in der Datei stehen kann, hat hier eine Zeile - und was der
+/// Schlüssel, der in der Datei stehen kann, hat hier eine Zeile - und was der
 /// Katalog nicht kennt, steht unter "Unbekannt" und in der Rohansicht. Eine
-/// .rdp-Datei, die durch diesen Editor gelaufen ist, soll ausser den bewusst
-/// geaenderten Zeilen nichts verloren haben.
+/// .rdp-Datei, die durch diesen Editor gelaufen ist, soll außer den bewusst
+/// geänderten Zeilen nichts verloren haben.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject
 {
@@ -32,6 +32,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private MonitorsPageViewModel _monitorPage = null!;
     private RawPageViewModel _rawPage = null!;
+    private TransportPageViewModel _transportPage = null!;
 
     public MainWindowViewModel() : this(null) { }
 
@@ -43,8 +44,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(startupFile) && File.Exists(startupFile))
             LoadFile(startupFile);
         else
-            Status = "Neue Datei mit den Voreinstellungen von mstsc. Oben links laesst sich eine "
-                   + "vorhandene .rdp-Datei oeffnen.";
+            Status = "Neue Datei mit den Voreinstellungen von mstsc. Oben links lässt sich eine "
+                   + "vorhandene .rdp-Datei öffnen.";
     }
 
     // ============================================================== Zustand
@@ -74,7 +75,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public string ThemeIcon => IsLightTheme ? "☀" : "☽";
 
-    /// <summary>Wie viele Schluessel die Datei enthaelt - die Zahl unten rechts.</summary>
+    /// <summary>Wie viele Schlüssel die Datei enthält - die Zahl unten rechts.</summary>
     public string CountText
     {
         get
@@ -82,8 +83,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
             var keys = _doc.Lines.Count(l => l.IsSetting);
             var unknown = _doc.Lines.Count(l => l.IsSetting && !RdpCatalog.Knows(l.Key!));
             return unknown > 0
-                ? $"{keys} Schluessel, davon {unknown} nicht im Katalog - Kodierung {_doc.SourceEncoding}"
-                : $"{keys} Schluessel - Kodierung {_doc.SourceEncoding}";
+                ? $"{keys} Schlüssel, davon {unknown} nicht im Katalog - Kodierung {_doc.SourceEncoding}"
+                : $"{keys} Schlüssel - Kodierung {_doc.SourceEncoding}";
         }
     }
 
@@ -104,47 +105,48 @@ public sealed partial class MainWindowViewModel : ObservableObject
     // ============================================================== Aufbau
 
     /// <summary>
-    /// Baut die Reiter neu auf. Noetig nach jedem Laden: Welche Zeilen unter
-    /// "Unbekannt" stehen, haengt am Inhalt der Datei.
+    /// Baut die Reiter neu auf. Nötig nach jedem Laden: Welche Zeilen unter
+    /// "Unbekannt" stehen, hängt am Inhalt der Datei.
     /// </summary>
     private void BuildPages()
     {
         Pages.Clear();
         _settingPages.Clear();
 
-        var byCategory = new Dictionary<string, SettingsPageViewModel>();
-
         foreach (var category in RdpCatalog.Categories)
-        {
-            var page = new SettingsPageViewModel(category);
-            byCategory[category] = page;
-            _settingPages.Add(page);
-        }
-
-        foreach (var definition in RdpCatalog.All)
-            if (byCategory.TryGetValue(definition.Category, out var page))
-                page.Settings.Add(new SettingViewModel(definition, _doc, OnDocumentChanged));
+            _settingPages.Add(BuildCategory(category));
 
         // Was in der Datei steht, aber im Katalog fehlt: eigener Reiter, damit
         // niemand raten muss, wo eine Zeile geblieben ist.
         var unknownPage = new SettingsPageViewModel(RdpCatalog.CatUnknown);
+        var unknownGroup = new SettingGroupViewModel(
+            "Nicht im Katalog",
+            "Diese Schlüssel stehen in der Datei, aber nicht in der Liste der bekannten "
+          + "Einstellungen. Sie lassen sich hier ändern und bleiben beim Speichern erhalten.");
+
         foreach (var line in _doc.Lines.Where(l => l.IsSetting && !RdpCatalog.Knows(l.Key!)))
-            unknownPage.Settings.Add(
+            unknownGroup.Settings.Add(
                 new SettingViewModel(RdpCatalog.Unknown(line.Key!, line.Type), _doc, OnDocumentChanged));
+
+        if (unknownGroup.Settings.Count > 0)
+            unknownPage.Groups.Add(unknownGroup);
 
         _monitorPage = new MonitorsPageViewModel(_doc, OnDocumentChanged);
         _rawPage = new RawPageViewModel(() => _doc.ToText(), ApplyRawText);
+        _transportPage = new TransportPageViewModel();
 
         // Reihenfolge der Reiter: erst die Bildschirme - deswegen gibt es das
-        // Programm -, dann die Masken, am Ende die Rohansicht.
+        // Programm -, dann die Masken, dann der Transport, am Ende die
+        // Rohansicht.
         Pages.Add(_monitorPage);
         foreach (var page in _settingPages)
             Pages.Add(page);
-        if (unknownPage.Settings.Count > 0)
+        if (unknownPage.Groups.Count > 0)
         {
             _settingPages.Add(unknownPage);
             Pages.Add(unknownPage);
         }
+        Pages.Add(_transportPage);
         Pages.Add(_rawPage);
 
         foreach (var page in _settingPages)
@@ -154,8 +156,68 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Wird nach jeder Aenderung aufgerufen, gleich aus welchem Reiter: Sie
-    /// arbeiten alle auf derselben Datei und muessen einander sehen.
+    /// Baut einen Reiter aus den Gruppen seiner Kategorie.
+    ///
+    /// Die Gruppen bestimmen Reihenfolge und Überschriften; was der Katalog
+    /// zur Kategorie führt, aber keine Gruppe nennt, käme in einen Kasten
+    /// "Weiteres" - dass dieser Kasten leer bleibt, prüft der Test.
+    /// </summary>
+    private SettingsPageViewModel BuildCategory(string category)
+    {
+        var page = new SettingsPageViewModel(category);
+        var vergeben = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var group in RdpGroups.ForCategory(category))
+        {
+            var groupVm = new SettingGroupViewModel(group.Title, group.Hint);
+
+            foreach (var key in group.Keys)
+            {
+                var definition = RdpCatalog.Find(key);
+                if (definition is null) continue;
+
+                groupVm.Settings.Add(new SettingViewModel(definition, _doc, OnDocumentChanged));
+                vergeben.Add(key);
+            }
+
+            foreach (var preset in group.Presets ?? Array.Empty<RdpPreset>())
+                groupVm.Presets.Add(new PresetViewModel(preset, ApplyPreset));
+
+            if (groupVm.Settings.Count > 0)
+                page.Groups.Add(groupVm);
+        }
+
+        var rest = RdpCatalog.All
+            .Where(s => s.Category == category && !vergeben.Contains(s.Key))
+            .ToList();
+
+        if (rest.Count > 0)
+        {
+            var restVm = new SettingGroupViewModel("Weiteres", "");
+            foreach (var definition in rest)
+                restVm.Settings.Add(new SettingViewModel(definition, _doc, OnDocumentChanged));
+            page.Groups.Add(restVm);
+        }
+
+        return page;
+    }
+
+    /// <summary>
+    /// Setzt einen ganzen Satz Werte auf einmal - was hinter den Knöpfen über
+    /// einer Gruppe steckt.
+    /// </summary>
+    private void ApplyPreset(RdpPreset preset)
+    {
+        foreach (var (key, value) in preset.Values)
+            _doc.Set(key, RdpCatalog.Find(key)?.Type ?? 's', value);
+
+        OnDocumentChanged();
+        Status = $"Vorgabe \"{preset.Title}\" übernommen: {preset.Values.Count} Zeilen gesetzt.";
+    }
+
+    /// <summary>
+    /// Wird nach jeder Änderung aufgerufen, gleich aus welchem Reiter: Sie
+    /// arbeiten alle auf derselben Datei und müssen einander sehen.
     /// </summary>
     private void OnDocumentChanged()
     {
@@ -175,7 +237,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         HasSignature = _doc.Contains("signature") || _doc.Contains("signscope");
         SignatureWarning = HasSignature
-            ? "Diese Datei ist signiert. Jede Aenderung macht die Unterschrift ungueltig - mstsc "
+            ? "Diese Datei ist signiert. Jede Änderung macht die Unterschrift ungültig - mstsc "
             + "zeigt die Verbindung danach als \"unbekannter Herausgeber\" an."
             : "";
     }
@@ -185,7 +247,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _doc = RdpDocument.Parse(text);
         BuildPages();
         IsDirty = true;
-        Status = "Der Text aus der Rohansicht ist uebernommen.";
+        Status = "Der Text aus der Rohansicht ist übernommen.";
         OnPropertyChanged(nameof(CountText));
     }
 
@@ -231,7 +293,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         var files = await window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "RDP-Datei oeffnen",
+            Title = "RDP-Datei öffnen",
             AllowMultiple = false,
             FileTypeFilter = new[] { RdpFileType, FilePickerFileTypes.All },
         });
@@ -292,7 +354,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     /// <summary>
     /// Startet mstsc mit der bearbeiteten Datei - die Probe aufs Exempel,
-    /// ohne den Umweg ueber den Explorer.
+    /// ohne den Umweg über den Explorer.
     /// </summary>
     [RelayCommand]
     private async Task StartMstsc()
@@ -349,7 +411,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void ClearSearch() => SearchText = "";
 
     /// <summary>
-    /// Fragt vor dem Verwerfen nach. Gibt true zurueck, wenn es weitergehen
+    /// Fragt vor dem Verwerfen nach. Gibt true zurück, wenn es weitergehen
     /// darf.
     /// </summary>
     public async Task<bool> ConfirmDiscard()
@@ -359,11 +421,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var window = HostWindow();
         if (window is null) return true;
 
-        return await MessageBox.ShowYesNo(window, "Aenderungen verwerfen?",
-            "Die Datei wurde geaendert und ist nicht gespeichert. Trotzdem fortfahren?");
+        return await MessageBox.ShowYesNo(window, "Änderungen verwerfen?",
+            "Die Datei wurde geändert und ist nicht gespeichert. Trotzdem fortfahren?");
     }
 
-    private static Window? HostWindow()
-        => (Avalonia.Application.Current?.ApplicationLifetime
-            as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+    private static Window? HostWindow() => AppWindow.Current;
 }

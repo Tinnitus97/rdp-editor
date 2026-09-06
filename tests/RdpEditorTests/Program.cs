@@ -36,13 +36,21 @@ internal static class Program
         PruefeKatalog();
 
         Console.WriteLine();
+        Console.WriteLine("Gruppen und Vorgaben");
+        PruefeGruppen();
+
+        Console.WriteLine();
+        Console.WriteLine("Transport");
+        PruefeTransport();
+
+        Console.WriteLine();
         Console.WriteLine($"{_passed} bestanden, {_failed} gescheitert.");
         return _failed == 0 ? 0 : 1;
     }
 
     // ============================================================ Parser
 
-    /// <summary>Die Beispieldatei aus samples\Server.rdp, gekuerzt.</summary>
+    /// <summary>Die Beispieldatei aus samples\Server.rdp, gekürzt.</summary>
     private const string Beispiel =
         "screen mode id:i:2\r\n" +
         "use multimon:i:0\r\n" +
@@ -75,19 +83,19 @@ internal static class Program
         Check("Kommas im Wert bleiben erhalten",
             doc.Get("winposstr") == "0,1,1344,63,3700,1591");
 
-        Check("Zeile fuer Zeile derselbe Text wie vorher",
+        Check("Zeile für Zeile derselbe Text wie vorher",
             doc.ToText() == Beispiel, doc.ToText().Replace("\r\n", "|"));
 
-        // Aendern an Ort und Stelle, nicht ans Ende.
+        // Ändern an Ort und Stelle, nicht ans Ende.
         doc.SetInt("use multimon", 1);
-        Check("ein geaenderter Wert bleibt an seiner Stelle",
+        Check("ein geänderter Wert bleibt an seiner Stelle",
             doc.Lines[1].Key == "use multimon" && doc.Lines[1].Value == "1");
 
         doc.Set("selectedmonitors", 's', "0,2");
-        Check("ein neuer Schluessel kommt ans Ende",
+        Check("ein neuer Schlüssel kommt ans Ende",
             doc.Lines[^1].Key == "selectedmonitors" && doc.Lines[^1].Value == "0,2");
 
-        Check("Gross- und Kleinschreibung ist gleichgueltig",
+        Check("Groß- und Kleinschreibung ist gleichgültig",
             doc.Get("Full Address") == "192.168.219.250");
 
         Check("Entfernen entfernt genau eine Zeile",
@@ -104,10 +112,10 @@ internal static class Program
 
         // Ein unbekannter Typbuchstabe ist keine Einstellung, sondern Text.
         var komisch = RdpDocument.Parse("etwas:x:1\r\n");
-        Check("ein unbekannter Typ zaehlt nicht als Einstellung",
+        Check("ein unbekannter Typ zählt nicht als Einstellung",
             !komisch.Lines[0].IsSetting);
 
-        Check("die Voreinstellung enthaelt die Schluessel, die mstsc schreibt",
+        Check("die Voreinstellung enthält die Schlüssel, die mstsc schreibt",
             RdpDocument.CreateDefault().Contains("screen mode id")
             && RdpDocument.CreateDefault().Contains("full address"));
     }
@@ -135,11 +143,11 @@ internal static class Program
             Check("UTF-8 ohne BOM wird gelesen",
                 gelesen8.Get("full address") == "192.168.219.250", gelesen8.SourceEncoding);
 
-            // Ein Umlaut ueberlebt den Weg durch UTF-8 hinein und UTF-16 hinaus.
+            // Ein Umlaut überlebt den Weg durch UTF-8 hinein und UTF-16 hinaus.
             var umlaut = Path.Combine(ordner, "umlaut.rdp");
-            File.WriteAllText(umlaut, "username:s:Kroeger\u00e4\r\n", new UTF8Encoding(true));
+            File.WriteAllText(umlaut, "username:s:Kröger\u00e4\r\n", new UTF8Encoding(true));
             var geladen = RdpDocument.Load(umlaut);
-            Check("Umlaute ueberstehen das Lesen", geladen.Get("username") == "Kroeger\u00e4");
+            Check("Umlaute überstehen das Lesen", geladen.Get("username") == "Kröger\u00e4");
 
             var ziel = Path.Combine(ordner, "gespeichert.rdp");
             geladen.Save(ziel);
@@ -147,8 +155,8 @@ internal static class Program
             var bytes = File.ReadAllBytes(ziel);
             Check("gespeichert wird UTF-16 LE mit BOM",
                 bytes.Length > 2 && bytes[0] == 0xFF && bytes[1] == 0xFE);
-            Check("Umlaute ueberstehen auch das Speichern",
-                RdpDocument.Load(ziel).Get("username") == "Kroeger\u00e4");
+            Check("Umlaute überstehen auch das Speichern",
+                RdpDocument.Load(ziel).Get("username") == "Kröger\u00e4");
             Check("die Zeilen enden mit CRLF",
                 Encoding.Unicode.GetString(bytes, 2, bytes.Length - 2).EndsWith("\r\n"));
         }
@@ -185,13 +193,13 @@ internal static class Program
         var mitte = Schirm(1, 1920, 0, primaer: true);
         var abseits = Schirm(2, 6000, 0);
 
-        Check("nebeneinanderliegende Bildschirme haengen zusammen",
+        Check("nebeneinanderliegende Bildschirme hängen zusammen",
             MonitorSelection.IsContiguous(new[] { links, mitte }));
-        Check("ein Bildschirm allein haengt immer zusammen",
+        Check("ein Bildschirm allein hängt immer zusammen",
             MonitorSelection.IsContiguous(new[] { abseits }));
-        Check("eine Luecke dazwischen faellt auf",
+        Check("eine Lücke dazwischen fällt auf",
             !MonitorSelection.IsContiguous(new[] { links, abseits }));
-        Check("ueber den mittleren Bildschirm haengt alles wieder zusammen",
+        Check("über den mittleren Bildschirm hängt alles wieder zusammen",
             MonitorSelection.IsContiguous(new[] { links, mitte, Schirm(3, 3840, 0) }));
 
         // Und das Schreiben in die Datei.
@@ -203,14 +211,14 @@ internal static class Program
         Check("und das Vollbild dazu", doc.GetInt("screen mode id", -1) == 2);
 
         MonitorSelection.Apply(doc, new[] { 0, 1, 2 }, 3);
-        Check("sind alle gewaehlt, entfaellt die Zeile wieder",
+        Check("sind alle gewählt, entfällt die Zeile wieder",
             !doc.Contains("selectedmonitors") && doc.GetInt("use multimon", -1) == 1);
 
         MonitorSelection.Apply(doc, Array.Empty<int>(), 3);
         Check("ohne Auswahl bleibt ein Bildschirm",
             !doc.Contains("selectedmonitors") && doc.GetInt("use multimon", -1) == 0);
 
-        // Fuer eine Datei, die auf einem anderen Rechner benutzt wird, ist die
+        // Für eine Datei, die auf einem anderen Rechner benutzt wird, ist die
         // Zahl der Bildschirme hier unbekannt - dann wird immer geschrieben.
         MonitorSelection.Apply(doc, new[] { 0, 1 }, 0);
         Check("ohne bekannte Bildschirmzahl wird die Auswahl geschrieben",
@@ -230,7 +238,7 @@ internal static class Program
             .Select(g => g.Key)
             .ToList();
 
-        Check("kein Schluessel steht zweimal im Katalog",
+        Check("kein Schlüssel steht zweimal im Katalog",
             doppelt.Count == 0, string.Join(", ", doppelt));
 
         var fremdeKategorie = RdpCatalog.All
@@ -246,7 +254,7 @@ internal static class Program
             .Select(s => s.Key)
             .ToList();
 
-        Check("jede Auswahlliste hat Eintraege",
+        Check("jede Auswahlliste hat Einträge",
             ohneAuswahl.Count == 0, string.Join(", ", ohneAuswahl));
 
         var falscherTyp = RdpCatalog.All
@@ -261,19 +269,148 @@ internal static class Program
         Check("jede Einstellung hat einen Hinweis im Klartext",
             ohneHinweis.Count == 0, string.Join(", ", ohneHinweis));
 
-        // Die Probe aufs Ganze: Jeder Schluessel der Beispieldatei soll im
+        // Die Probe aufs Ganze: Jeder Schlüssel der Beispieldatei soll im
         // Katalog stehen. Was fehlt, landet zwar unter "Unbekannt" und geht
         // nicht verloren - aber ohne Klartext daneben.
         var beispiel = RdpDocument.Parse(BeispielVollstaendig);
         var unbekannt = beispiel.Keys.Where(k => !RdpCatalog.Knows(k)).ToList();
-        Check("der Katalog kennt jeden Schluessel der Beispieldatei",
+        Check("der Katalog kennt jeden Schlüssel der Beispieldatei",
             unbekannt.Count == 0, string.Join(", ", unbekannt));
 
         Check("die Bildschirmauswahl selbst steht auch im Katalog",
             RdpCatalog.Knows("selectedmonitors") && RdpCatalog.Knows("use multimon"));
 
-        Check("ein unbekannter Schluessel bekommt einen Ersatzeintrag",
+        Check("ein unbekannter Schlüssel bekommt einen Ersatzeintrag",
             RdpCatalog.Unknown("irgendwas", 's').Category == RdpCatalog.CatUnknown);
+    }
+
+    // ============================================================ Gruppen
+
+    private static void PruefeGruppen()
+    {
+        // Jede Zeile des Katalogs muss in genau einem Kasten stehen - sonst
+        // steht sie im Fenster unter "Weiteres" und niemand findet sie dort.
+        var inGruppen = RdpGroups.AllKeys.ToList();
+
+        var ohneGruppe = RdpCatalog.All
+            .Where(s => !inGruppen.Contains(s.Key, StringComparer.OrdinalIgnoreCase))
+            .Select(s => s.Key)
+            .ToList();
+
+        Check("jede Einstellung steht in einer Gruppe",
+            ohneGruppe.Count == 0, string.Join(", ", ohneGruppe));
+
+        var doppelt = inGruppen
+            .GroupBy(k => k, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        Check("keine Einstellung steht in zwei Gruppen",
+            doppelt.Count == 0, string.Join(", ", doppelt));
+
+        var unbekannt = inGruppen.Where(k => !RdpCatalog.Knows(k)).ToList();
+        Check("keine Gruppe nennt einen Schlüssel, den der Katalog nicht kennt",
+            unbekannt.Count == 0, string.Join(", ", unbekannt));
+
+        // Eine Gruppe darf nur Schlüssel ihrer eigenen Kategorie nennen -
+        // sonst stünde eine Zeile im falschen Reiter.
+        var falscherReiter = RdpGroups.All
+            .SelectMany(g => g.Keys.Select(k => (Gruppe: g, Key: k)))
+            .Where(x => RdpCatalog.Find(x.Key) is { } s && s.Category != x.Gruppe.Category)
+            .Select(x => $"{x.Key} in {x.Gruppe.Title}")
+            .ToList();
+
+        Check("jede Gruppe nennt nur Schlüssel ihres eigenen Reiters",
+            falscherReiter.Count == 0, string.Join(", ", falscherReiter));
+
+        var leereKategorie = RdpCatalog.Categories
+            .Where(c => !RdpGroups.All.Any(g => g.Category == c))
+            .ToList();
+
+        Check("jeder Reiter hat mindestens eine Gruppe",
+            leereKategorie.Count == 0, string.Join(", ", leereKategorie));
+
+        // Die Vorgabeknöpfe: Was sie schreiben, muss der Katalog kennen, und
+        // in ein Zahlenfeld gehört eine Zahl.
+        var presets = RdpGroups.All
+            .SelectMany(g => g.Presets ?? Array.Empty<RdpPreset>())
+            .ToList();
+
+        Check("es gibt Vorgabeknöpfe", presets.Count > 0);
+
+        var fremd = presets
+            .SelectMany(p => p.Values.Keys)
+            .Where(k => !RdpCatalog.Knows(k))
+            .Distinct()
+            .ToList();
+
+        Check("jede Vorgabe schreibt nur bekannte Schlüssel",
+            fremd.Count == 0, string.Join(", ", fremd));
+
+        var falscherWert = presets
+            .SelectMany(p => p.Values)
+            .Where(v => RdpCatalog.Find(v.Key) is { Type: 'i' } && !int.TryParse(v.Value, out _))
+            .Select(v => $"{v.Key}={v.Value}")
+            .ToList();
+
+        Check("in ein Zahlenfeld schreibt keine Vorgabe Text",
+            falscherWert.Count == 0, string.Join(", ", falscherWert));
+
+        // Und die Probe, dass eine Vorgabe wirklich ankommt.
+        var doc = RdpDocument.CreateDefault();
+        var lan = presets.First(p => p.Title.StartsWith("LAN"));
+        foreach (var (key, value) in lan.Values)
+            doc.Set(key, RdpCatalog.Find(key)?.Type ?? 's', value);
+
+        Check("die Vorgabe \"LAN\" setzt die Übertragungsrate",
+            doc.GetInt("connection type", -1) == 6);
+        Check("die Vorgabe \"LAN\" lässt das Hintergrundbild an",
+            doc.GetInt("disable wallpaper", -1) == 0);
+    }
+
+    // ============================================================ Transport
+
+    private static void PruefeTransport()
+    {
+        Check("die .reg-Datei setzt den Wert auf 1",
+            UdpTransport.RegFileContent(1).Contains("dword:00000001"));
+        Check("die .reg-Datei nennt den Richtlinienpfad",
+            UdpTransport.RegFileContent(1).Contains(UdpTransport.PolicyPath));
+        Check("die .reg-Datei kann den Wert auch entfernen",
+            UdpTransport.RegFileContent(null).Contains($"\"{UdpTransport.ValueName}\"=-"));
+
+        Check("reg.exe bekommt zum Setzen ein add",
+            UdpTransport.RegArguments(1).StartsWith("add ")
+            && UdpTransport.RegArguments(1).Contains("/d 1"));
+        Check("reg.exe bekommt zum Entfernen ein delete",
+            UdpTransport.RegArguments(null).StartsWith("delete "));
+
+        // Steht nichts da, entscheidet Windows.
+        var leer = new[]
+        {
+            new TransportState("A", "pfad", null, true),
+            new TransportState("B", "pfad", null, false),
+        };
+        Check("ohne Eintrag entscheidet Windows",
+            UdpTransport.Describe(leer).Contains("Windows entscheidet"));
+
+        // Die erste gefundene Stelle gewinnt - die Richtlinie steht vorn.
+        var gemischt = new[]
+        {
+            new TransportState("Richtlinie", "pfad", 1, true),
+            new TransportState("Client", "pfad", 0, true),
+        };
+        Check("die Richtlinie geht der Client-Einstellung vor",
+            UdpTransport.Describe(gemischt).Contains("abgeschaltet"));
+
+        Check("eine erlaubte Einstellung wird als solche gemeldet",
+            UdpTransport.Describe(new[] { new TransportState("Richtlinie", "pfad", 0, true) })
+                        .Contains("erlaubt"));
+
+        Check("der Zustandstext nennt den Wert im Klartext",
+            new TransportState("x", "y", 1, true).ValueText.Contains("nur TCP")
+            && new TransportState("x", "y", null, true).ValueText == "nicht gesetzt");
     }
 
     /// <summary>Die Beispieldatei, wie mstsc sie geschrieben hat.</summary>

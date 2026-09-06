@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RdpEditor.ViewModels"
+        xmlns:svc="using:RdpEditor.Services"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
@@ -21,8 +22,8 @@
         Die Reiter kommen aus der Liste "Pages" des ViewModels. Welche Vorlage
         ein Reiter benutzt, entscheidet sein Typ - die drei Vorlagen unten in
         Window.DataTemplates. So steht der Sonderfall "Bildschirme" neben den
-        gewoehnlichen Einstellungsseiten, ohne dass eine der beiden von der
-        anderen weiss.
+        gewöhnlichen Einstellungsseiten, ohne dass eine der beiden von der
+        anderen weiß.
     -->
 
     <Window.DataTemplates>
@@ -70,7 +71,7 @@
                               Margin="12,0,2,0" VerticalAlignment="Center"
                               Content="in Datei"
                               IsChecked="{Binding IsPresent, Mode=TwoWay}"
-                              ToolTip.Tip="Ohne Haken fehlt der Schluessel in der Datei. Das ist nicht dasselbe wie 'aus' - dann entscheidet mstsc."/>
+                              ToolTip.Tip="Ohne Haken fehlt der Schlüssel in der Datei. Das ist nicht dasselbe wie 'aus' - dann entscheidet mstsc."/>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -78,11 +79,42 @@
         <!-- ============================================================
              Eine Seite voller Einstellungen.
              ============================================================ -->
+        <DataTemplate DataType="vm:SettingGroupViewModel">
+            <Border Classes="panel group" IsVisible="{Binding IsVisible}">
+                <StackPanel Spacing="5">
+                    <TextBlock Classes="groupTitle" Text="{Binding Title}"/>
+                    <TextBlock Classes="groupHint" Text="{Binding Hint}"
+                               IsVisible="{Binding HasHint}"/>
+
+                    <!-- Die Knöpfe, die einen ganzen Satz Werte auf einmal
+                         setzen. Was sie schreiben, steht am Mauszeiger. -->
+                    <ItemsControl ItemsSource="{Binding Presets}"
+                                  IsVisible="{Binding HasPresets}" Margin="0,2,0,2">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PresetViewModel">
+                                <Button Classes="secondary preset"
+                                        Content="{Binding Title}"
+                                        ToolTip.Tip="{Binding Tip}"
+                                        Command="{Binding ApplyCommand}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding Settings}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate DataType="vm:SettingsPageViewModel">
             <Grid RowDefinitions="*,Auto" Margin="8">
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
-                    <ItemsControl ItemsSource="{Binding Settings}"/>
+                    <ItemsControl ItemsSource="{Binding Groups}"/>
                 </ScrollViewer>
 
                 <TextBlock Grid.Row="1" Classes="entryHint" Margin="4,6,0,0"
@@ -104,7 +136,7 @@
                             <TextBlock Classes="section" Margin="0"
                                        Text="Welche Bildschirme benutzt die Sitzung?"/>
                             <TextBlock Classes="hintText"
-                                       Text="Anklicken waehlt einen Bildschirm aus oder ab. Der erste gewaehlte wird der Hauptbildschirm der Sitzung - dort erscheinen Anmeldung und Taskleiste."/>
+                                       Text="Anklicken wählt einen Bildschirm aus oder ab. Der erste gewählte wird der Hauptbildschirm der Sitzung - dort erscheinen Anmeldung und Taskleiste."/>
                             <TextBlock Classes="hintText" Text="{Binding ScanText}"/>
                         </StackPanel>
                     </Border>
@@ -122,7 +154,7 @@
                                 Command="{Binding ShowWindowsListCommand}"/>
                     </StackPanel>
 
-                    <!-- Der Plan. Jede Kachel liegt massstaeblich dort, wo der
+                    <!-- Der Plan. Jede Kachel liegt maßstäblich dort, wo der
                          Bildschirm in der Anzeigeeinstellung von Windows liegt. -->
                     <Border Classes="panel" Padding="0" IsVisible="{Binding HasMonitors}">
                         <ItemsControl ItemsSource="{Binding Monitors}"
@@ -133,8 +165,8 @@
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
-                            <!-- Die Lage der Kachel auf der Flaeche steht am
-                                 Behaelter, nicht an der Kachel selbst. -->
+                            <!-- Die Lage der Kachel auf der Fläche steht am
+                                 Behälter, nicht an der Kachel selbst. -->
                             <ItemsControl.ItemContainerTheme>
                                 <ControlTheme TargetType="ContentPresenter" x:CompileBindings="False">
                                     <Setter Property="Canvas.Left" Value="{Binding MapX}"/>
@@ -170,8 +202,8 @@
                     </Border>
 
                     <!-- Die Liste der Bildschirme im Klartext - und die
-                         Moeglichkeit, Nummern einzutippen, die es an diesem
-                         Rechner gar nicht gibt. Wer eine Datei fuer einen
+                         Möglichkeit, Nummern einzutippen, die es an diesem
+                         Rechner gar nicht gibt. Wer eine Datei für einen
                          anderen Arbeitsplatz vorbereitet, braucht genau das. -->
                     <Border Classes="panel">
                         <StackPanel Spacing="6">
@@ -180,7 +212,7 @@
                                 <TextBox Classes="field" Width="220"
                                          PlaceholderText="z. B. 0,1"
                                          Text="{Binding ManualText, Mode=TwoWay}"/>
-                                <Button Classes="action" Content="Uebernehmen"
+                                <Button Classes="action" Content="Übernehmen"
                                         Command="{Binding ApplyManualCommand}"/>
                             </StackPanel>
 
@@ -217,12 +249,83 @@
         </DataTemplate>
 
         <!-- ============================================================
+             TCP oder UDP. Der einzige Reiter, der nicht die Datei ändert -
+             weil es in der Datei nichts zu ändern gibt.
+             ============================================================ -->
+        <DataTemplate DataType="vm:TransportPageViewModel">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
+                <StackPanel Margin="8" Spacing="8">
+
+                    <Border Classes="hintband">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section" Margin="0"
+                                       Text="TCP oder UDP - steht nicht in der Datei"/>
+                            <TextBlock Classes="hintText" Text="{Binding Explanation}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="warning">
+                        <TextBlock Classes="warningText" Text="{Binding Warning}"/>
+                    </Border>
+
+                    <Border Classes="panel group">
+                        <StackPanel Spacing="5">
+                            <TextBlock Classes="groupTitle" Text="Zustand dieses Rechners"/>
+
+                            <ItemsControl ItemsSource="{Binding States}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="svc:TransportState">
+                                        <Border Classes="entryCard">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Classes="entryTitle" Text="{Binding Scope}"/>
+                                                    <TextBlock Classes="entryKey" Text="{Binding Path}"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Classes="entryHint"
+                                                           VerticalAlignment="Center" Margin="10,0,2,0"
+                                                           Text="{Binding ValueText}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Classes="hintText" Text="{Binding Summary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <WrapPanel>
+                        <Button Classes="action" Margin="0,0,6,4"
+                                Content="UDP abschalten (nur TCP)"
+                                Command="{Binding DisableUdpCommand}"/>
+                        <Button Classes="secondary" Margin="0,0,6,4"
+                                Content="UDP zulassen"
+                                Command="{Binding EnableUdpCommand}"/>
+                        <Button Classes="secondary" Margin="0,0,6,4"
+                                Content="Eintrag entfernen"
+                                Command="{Binding RemoveSettingCommand}"/>
+                        <Button Classes="secondary" Margin="0,0,6,4"
+                                Content="Neu einlesen"
+                                Command="{Binding RescanCommand}"/>
+                        <Button Classes="secondary" Margin="0,0,6,4"
+                                Content="Als .reg-Datei speichern"
+                                ToolTip.Tip="Schreibt dieselbe Änderung als Registrierungsdatei - für Rechner, auf denen dieses Programm nicht liegt."
+                                Command="{Binding SaveRegFileCommand}"/>
+                    </WrapPanel>
+
+                    <TextBlock Classes="entryHint" Text="{Binding Status}"/>
+
+                </StackPanel>
+            </ScrollViewer>
+        </DataTemplate>
+
+        <!-- ============================================================
              Die Rohansicht.
              ============================================================ -->
         <DataTemplate DataType="vm:RawPageViewModel">
             <Grid RowDefinitions="Auto,*,Auto" Margin="8">
                 <TextBlock Grid.Row="0" Classes="entryHint" Margin="2,0,2,6"
-                           Text="Die Datei, wie sie gespeichert wird: UTF-16 LE mit Byte-Order-Mark und CRLF am Zeilenende - genau die Form, die mstsc selbst schreibt. Aenderungen hier wirken erst nach 'Uebernehmen'."/>
+                           Text="Die Datei, wie sie gespeichert wird: UTF-16 LE mit Byte-Order-Mark und CRLF am Zeilenende - genau die Form, die mstsc selbst schreibt. Änderungen hier wirken erst nach 'Übernehmen'."/>
 
                 <TextBox Grid.Row="1" Classes="mono"
                          Text="{Binding RawText, Mode=TwoWay}"
@@ -231,9 +334,9 @@
                          VerticalAlignment="Stretch"/>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6" Margin="0,6,0,0">
-                    <Button Classes="action" Content="Uebernehmen"
+                    <Button Classes="action" Content="Übernehmen"
                             Command="{Binding ApplyCommand}"/>
-                    <Button Classes="secondary" Content="Zuruecksetzen"
+                    <Button Classes="secondary" Content="Zurücksetzen"
                             Command="{Binding RevertCommand}"/>
                     <TextBlock Classes="entryHint" VerticalAlignment="Center"
                                Text="{Binding Status}"/>
@@ -255,10 +358,10 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal"
                         VerticalAlignment="Center" Spacing="5">
                 <Button Classes="secondary" Content="Neu" Command="{Binding NewCommand}"/>
-                <Button Classes="secondary" Content="Oeffnen" Command="{Binding OpenCommand}"/>
+                <Button Classes="secondary" Content="Öffnen" Command="{Binding OpenCommand}"/>
                 <Button Classes="action" Content="Speichern" Command="{Binding SaveCommand}"/>
                 <Button Classes="secondary" Content="Speichern unter" Command="{Binding SaveAsCommand}"/>
-                <Button Classes="secondary" Content="Mit mstsc oeffnen" Command="{Binding StartMstscCommand}"/>
+                <Button Classes="secondary" Content="Mit mstsc öffnen" Command="{Binding StartMstscCommand}"/>
                 <Button Classes="secondary" Width="34" Content="{Binding ThemeIcon}"
                         FontSize="14" ToolTip.Tip="Hell-/Dunkelmodus"
                         Command="{Binding ToggleThemeCommand}"/>
@@ -268,13 +371,13 @@
         <!-- ============ Suche ============ -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="2,0,2,6">
             <TextBox Grid.Column="0" Classes="field"
-                     PlaceholderText="Suchen - im Schluessel, in der Beschriftung und im Hinweis"
+                     PlaceholderText="Suchen - im Schlüssel, in der Beschriftung und im Hinweis"
                      Text="{Binding SearchText, Mode=TwoWay}"/>
             <Button Grid.Column="1" Classes="secondary" Margin="5,0,0,0"
                     Content="Leeren" Command="{Binding ClearSearchCommand}"/>
         </Grid>
 
-        <!-- ============ Warnung fuer signierte Dateien ============ -->
+        <!-- ============ Warnung für signierte Dateien ============ -->
         <Border Grid.Row="2" Classes="warning" Margin="2,0,2,6" Padding="8,5"
                 IsVisible="{Binding HasSignature}">
             <TextBlock Classes="warningText" Text="{Binding SignatureWarning}"/>
@@ -289,7 +392,7 @@
             </TabControl.ItemTemplate>
         </TabControl>
 
-        <!-- ============ Fusszeile ============ -->
+        <!-- ============ Fußzeile ============ -->
         <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="4,7,4,0">
             <TextBlock Grid.Column="0" Classes="entryHint" Text="{Binding Status}"/>
             <TextBlock Grid.Column="1" Classes="entryKey" Text="{Binding CountText}"/>
