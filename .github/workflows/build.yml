@@ -76,4 +76,4 @@ jobs:
         with:
           name: RdpEditor
           path: publish/RdpEditor.exe
-          retention-days: 30
+          retention-days: 3
