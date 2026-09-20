@@ -15,9 +15,9 @@ jobs:
   pruefungen:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -49,9 +49,9 @@ jobs:
   uebersetzen:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -72,7 +72,7 @@ jobs:
             -p:DebugType=none -p:DebugSymbols=false
           if (-not (Test-Path 'publish/RdpEditor.exe')) { throw 'RdpEditor.exe wurde nicht erzeugt.' }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RdpEditor
           path: publish/RdpEditor.exe
