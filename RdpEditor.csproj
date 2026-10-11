@@ -26,7 +26,7 @@
     <RootNamespace>RdpEditor</RootNamespace>
     <Product>RDP-Editor</Product>
     <AssemblyTitle>RDP-Editor</AssemblyTitle>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Description>Bearbeitet alle Einstellungen einer .rdp-Datei - auch die, die mstsc nicht anbietet</Description>
 
     <!-- Herausgeber-Angaben. Sie landen in den Dateieigenschaften der EXE und
