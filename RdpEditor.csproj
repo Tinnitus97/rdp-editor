@@ -51,7 +51,7 @@
     <!-- Kommt über Avalonia.Desktop transitiv herein und wird nur unter Linux
          benutzt. Ausdruecklich auf die neueste Fassung gehoben, deutlich über
          der für CVE-2026-39959 gepatchten 0.92.0. -->
-    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.1" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.2" />
   </ItemGroup>
 
   <!-- Das Testprojekt liegt unter tests\ und hat einen eigenen
