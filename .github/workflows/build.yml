@@ -17,9 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
+      - uses: ./.github/actions/dotnet-lts
 
       # Vorgeschaltet und in Sekunden durch: Ist jede .axaml überhaupt
       # wohlgeformtes XML? Der Avalonia-Übersetzer merkt das auch - aber erst
@@ -51,9 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
+      - uses: ./.github/actions/dotnet-lts
 
       - name: Kompilieren
         shell: pwsh
